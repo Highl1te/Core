@@ -1,14 +1,18 @@
+import { ContextMenuHelper } from "./helpers/ContextMenuHelpers";
 import { PluginLoader } from "./pluginLoader";
 import { Settings } from "./settings";
 
 export class Highlite {
     pluginLoader = new PluginLoader;
     settings = new Settings;
+    contextMenuHelper = new ContextMenuHelper;
 
     constructor() {
         console.info("[Highlite] Core Initializing!");
 
         document.highlite = {};
+        document.highlite.Helpers = {};
+        document.highlite.Helpers.ContextMenu = this.contextMenuHelper;
         document.highlite.gameHooks = {};
         document.highlite.gameHooks.Classes = {};
         document.highlite.gameHooks.Listeners = {};
@@ -17,28 +21,44 @@ export class Highlite {
         // this.attachListeners("NI");
 
         // Instance Hook-ins
-        this.registerClass("mk", "EntityManager");
+        this.registerClass("Ck", "EntityManager");
         this.registerClass("hN", "GroundItemManager");
         this.registerClass("oF", "MeshManager");
         this.registerClass("_F", "WorldMapManager");
         this.registerClass("GR", "AtmosphereManager");
         this.registerClass("sD", "WorldEntityManager");
-        this.registerClass("_z", "SpellManager")
-        this.registerClass("Ak", "SpellMeshManager");
-        this.registerClass("Rk", "GameLoop");
-        this.registerClass("zV", "ChatManager");
-        this.registerClass("gz", "RangeManager");
-        this.registerClass("Dz", "SocketManager");
-        this.registerClass("Nz", "ItemManager");
-        this.registerClass("kz", "GameEngine");
+        this.registerClass("Iz", "SpellManager")
+        this.registerClass("Dk", "SpellMeshManager");
+        this.registerClass("wk", "GameLoop");
+        this.registerClass("$V", "ChatManager");
+        this.registerClass("Pz", "RangeManager");
+        this.registerClass("zz", "SocketManager");
+        this.registerClass("qz", "ItemManager");
+        this.registerClass("$z", "GameEngine");
+        this.registerClass("LF", "MainPlayer");
+        this.registerClass("tR", "GameCameraManager");
+
+        // Needs Naming
+        this.registerClass("AF", "AF");
+        this.registerClass("aG", "aG")
 
 
         // Function Hook-ins
         this.registerClassHook("GameLoop", "_update");
+        this.registerClassHook("GameLoop", "_draw");
         this.registerClassHook("SocketManager", "_loggedIn");
         this.registerClassHook("SocketManager", "_handleLoggedOut");
+        this.registerClassHook("SocketManager", "_handleEnteredIdleStateAction");
+        this.registerClassHook("EntityManager", "addOtherPlayer");
 
+        // Needs Naming
+        this.registerClassHook("AF", "addItemToInventory");
+        this.contextMenuHelper.registerContextHook("vG", "_createInventoryItemContextMenuItems", this.contextMenuHelper.inventoryContextHook);
+        this.contextMenuHelper.registerContextHook("vG", "_createGameWorldContextMenuItems", this.contextMenuHelper.gameWorldContextHook);
+        this.registerStaticClassHook('dG', 'handleTargetAction');
+        this.registerClassHook("ItemManager", "invokeInventoryAction");
 
+        
         /*
          Post-Hooking, we tell HighSpell Client to start by re-running DOMContentLoaded
          Highlite Loader removes the client so it does not get a chance to see this event before now.
@@ -85,6 +105,32 @@ export class Highlite {
 
         if (!classObject) {
             console.warn(`[Highlite] Attempted to register unknown client class hook (${sourceClass}).`);
+        }
+
+        let functionName = fnName;
+        if (functionName.startsWith("_")) {
+            functionName = functionName.substring(1)
+        }
+
+        const hookName = `${sourceClass}_${functionName}`;
+        (function (originalFunction : any) {
+            classObject[fnName] = function (...args : Array<unknown>) {
+                const originalReturn = originalFunction.apply(this, arguments);
+                hookFn.apply(self, [hookName, ...args, this]);
+                
+                return originalReturn;
+            }
+        }(classObject[fnName]));
+
+        return true;
+    }
+
+    registerStaticClassHook(sourceClass : string, fnName : string, hookFn = this.hook) : boolean {
+        const self = this;
+        const classObject = document.client.get(sourceClass);
+
+        if (!classObject) {
+            console.warn(`[Highlite] Attempted to register unknown static client class hook (${sourceClass}).`);
         }
 
         let functionName = fnName;

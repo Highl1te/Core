@@ -1,6 +1,4 @@
 import { Plugin } from "../interfaces/plugin.class";
-let pJSON = require('../../../package.json');
-
 
 export class HPAlert extends Plugin {
     pluginName: string = "HPAlert";
@@ -57,5 +55,4 @@ export class HPAlert extends Plugin {
             osc2.stop(ctx.currentTime + 0.45); // Another 0.2-second chirp
         }
     }
-
 }
