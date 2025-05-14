@@ -2,7 +2,6 @@ BEGIN {
     isAfterImports = 0
     isMaybeClient = 0
     fileName = ""
-    printed = {}
     system("mkdir -p ./highspellClient && mkdir -p ./highspellClient/babylonStuff")
 }
 /^    \( \(\) => \{$/ { # everything after this is past the imports
@@ -14,12 +13,16 @@ BEGIN {
 }
 
 /^[[:space:]]*class/ {
+    if (!isAfterImports){
+        next
+    }
     baseName = ""
     if (!printed[tolower($2)]) {
         printed[tolower($2)]++
         baseName = $2
     } else {
-        baseName = $2 "_" printed[tolower($2)]
+        baseName = $2 "$" printed[tolower($2)]
+        printed[tolower($2)]++
     }
 
     if (isMaybeClient) {

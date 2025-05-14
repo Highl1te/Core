@@ -243,8 +243,40 @@ class VersionNotification extends Plugin {
   }
 }
 
+// src/core/plugins/RefreshWarning.ts
+var pJSON3 = require_package();
+
+class RefreshWarning extends Plugin {
+  pluginName = "Refresh Warning";
+  settings = {
+    enabled: true
+  };
+  init() {
+    this.log("Initializing");
+  }
+  start() {
+    this.log("Started");
+    if (this.settings.enabled) {
+      this.enableWarning();
+    }
+  }
+  stop() {
+    this.log("Stopped");
+  }
+  enableWarning() {
+    window.addEventListener("beforeunload", this.refreshWarning);
+  }
+  disableWarning() {
+    window.removeEventListener("beforeunload", this.refreshWarning);
+  }
+  refreshWarning(e) {
+    e.preventDefault();
+  }
+}
+
 // src/index.ts
 var highlite = new Highlite;
 highlite.pluginLoader.registerPlugin(VersionNotification);
 highlite.pluginLoader.registerPlugin(HPAlert);
+highlite.pluginLoader.registerPlugin(RefreshWarning);
 highlite.start();

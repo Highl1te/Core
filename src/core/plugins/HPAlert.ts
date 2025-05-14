@@ -15,11 +15,11 @@ export class HPAlert extends Plugin {
     }
     
     start(): void {
-        this.log("Started")
+        this.log("Started");
     }
 
     stop(): void {
-        this.log("Stopped")
+        this.log("Stopped");
     }
 
 

@@ -1,7 +1,9 @@
 import { PluginLoader } from "./pluginLoader";
+import { Settings } from "./settings";
 
 export class Highlite {
     pluginLoader = new PluginLoader;
+    settings = new Settings;
 
     constructor() {
         console.info("[Highlite] Core Initializing!");
