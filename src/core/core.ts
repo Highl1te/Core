@@ -71,6 +71,7 @@ export class Highlite {
 
     start() {
         console.info("[Highlite] Core Started!");
+        this.settings.registerPlugins();
         this.pluginLoader.initAll();
         this.pluginLoader.postInitAll();
         this.pluginLoader.startAll();

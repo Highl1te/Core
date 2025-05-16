@@ -1,3 +1,5 @@
+import type { PluginLoader } from "./pluginLoader"
+
 declare global {
     interface Window {
         [key: string]: any,
@@ -5,6 +7,7 @@ declare global {
 
     interface Document {
         highlite: {
+            pluginLoader: PluginLoader,
             [key: string]: any,
         },
 

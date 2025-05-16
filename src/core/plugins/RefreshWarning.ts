@@ -1,12 +1,19 @@
 import { Plugin } from "../interfaces/plugin.class";
+import { SettingsTypes } from "../interfaces/PluginSettings";
 let pJSON = require('../../../package.json');
 
 export class RefreshWarning extends Plugin {
     pluginName: string = "Refresh Warning";
 
     settings = {
-        enabled: true
-    };
+        enabled: {
+            text: "Enabled",
+            type: SettingsTypes.checkbox,
+            value: false,
+            default: false,
+            callback: () => { } //TODO 
+        },
+    }
 
     init(): void {
         this.log("Initializing");

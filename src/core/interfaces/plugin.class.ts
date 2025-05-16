@@ -1,3 +1,5 @@
+import type { PluginSettings } from "./PluginSettings";
+
 export abstract class Plugin {
     abstract pluginName : string;
 
@@ -5,7 +7,7 @@ export abstract class Plugin {
     abstract start(): void;
     abstract stop(): void;
     abstract settings : {
-        [key: string] : number | boolean | string;
+        [key: string] : PluginSettings;
     }
     
     postInit?(): void;

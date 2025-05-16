@@ -1,17 +1,36 @@
 import { Plugin } from "../interfaces/plugin.class";
+import { SettingsTypes } from "../interfaces/PluginSettings";
 
 export class HPAlert extends Plugin {
     pluginName: string = "HPAlert";
     settings = {
-        volume : 0.5,
-        activationPercent : 0.5,
-        enabled : true
+        enabled: {
+            text: "Enabled",
+            type: SettingsTypes.checkbox,
+            value: false,
+            default: false,
+            callback: () => { } //TODO 
+        },
+        volume: {
+            text: "Volume",
+            type: SettingsTypes.range,
+            value: 0,
+            default: 0.5,
+            callback: () => { } //TODO 
+        },
+        activationPercent: {
+            text: "Activation Percent",
+            type: SettingsTypes.range,
+            value: 0,
+            default: 0.5,
+            callback: () => { } //TODO 
+        },
     };
 
     init(): void {
         this.log("Initializing");
     }
-    
+
     start(): void {
         this.log("Started");
     }
@@ -21,7 +40,7 @@ export class HPAlert extends Plugin {
     }
 
 
-    GameLoop_update(...args : any) {
+    GameLoop_update(...args: any) {
         const player = this.gameHooks.Classes.EntityManager.Instance._mainPlayer;
 
         if (player === undefined) {
@@ -37,7 +56,7 @@ export class HPAlert extends Plugin {
             const gain = ctx.createGain();
             gain.gain.value = 0.1;
             gain.connect(ctx.destination);
-            
+
             // First chirp
             const osc1 = ctx.createOscillator();
             osc1.type = 'triangle';
@@ -45,7 +64,7 @@ export class HPAlert extends Plugin {
             osc1.connect(gain);
             osc1.start(ctx.currentTime);
             osc1.stop(ctx.currentTime + 0.2); // Chirp for 0.2 seconds
-            
+
             // Second chirp (starts after 0.25 seconds)
             const osc2 = ctx.createOscillator();
             osc2.type = 'triangle';

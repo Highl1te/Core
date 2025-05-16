@@ -5,7 +5,7 @@ export class Settings {
 
     settingsMenu: HTMLElement | null;
 
-    private pluginSettings: {[plugin: string]: HTMLElement};
+    private pluginSettings: { [plugin: string]: HTMLElement };
 
     constructor() {
         this.settingsMenu = document.getElementById("hs-settings-menu");
@@ -24,7 +24,16 @@ export class Settings {
         this.pluginSettings = {};
     }
 
-    registerPlugin(pluginName: string) {
+    registerPlugins() {
+        for (let plugin of document.highlite.pluginLoader.plugins) {
+            this.registerPlugin(plugin.pluginName);
+            let pluginSettings = plugin.settings;
+        }
+
+    }
+
+
+    private registerPlugin(pluginName: string) {
         let pluginTitleBar = document.createElement("div");
         pluginTitleBar.className = "hs-settings-menu__section";
 
@@ -38,7 +47,7 @@ export class Settings {
         this.pluginSettings[pluginName] = pluginTitleBar;
     }
 
-    registerSettings(settings: PluginSettings) {
+    private registerSettings(settings: PluginSettings) {
         switch (settings.type) {
             case SettingsType.checkbox {
                 checkbox = document.createElement("div");

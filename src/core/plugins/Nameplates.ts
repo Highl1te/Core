@@ -3,7 +3,7 @@ import {Viewport, Matrix, Vector3, Frustum, Camera, Mesh} from "@babylonjs/core"
 
 export class Nameplates extends Plugin {
     pluginName: string = "Nameplates";
-    settings: { [key: string]: string | number | boolean; } = {};
+    settings = {};
 
     NampeplateContainer : HTMLDivElement | null = null;
     NPCDomElements = {}
