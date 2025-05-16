@@ -1,5 +1,6 @@
 import { Plugin } from "../interfaces/plugin.class";
 import { ActionState } from "../interfaces/game/actionStates.enum.ts";
+import { NotificationHelper } from "../helpers/NotificationHelper.ts";
 
 export class IdleAlert extends Plugin {
     pluginName: string = "IdleAlert";
@@ -82,7 +83,7 @@ export class IdleAlert extends Plugin {
             osc2.start(ctx.currentTime + 0.25);
             osc2.stop(ctx.currentTime + 0.45); // Another 0.2-second chirp
 
-            // alert("Player is idle.");
+            NotificationHelper.showNotification(`${player._name} is idle!`);
             this.actionState = 0;
             this.idleTicks = 0;
         }

@@ -168,7 +168,7 @@ export class Nameplates extends Plugin {
             t.style.visibility = "visible";
         }
 
-        t.style.transform = "translate3d(calc(" + this.pxToRem(translationCoordinates.x) + "rem - 50%), calc(" + this.pxToRem(translationCoordinates.y) + "rem - 50%), 0px)"
+        t.style.transform = "translate3d(calc(" + this.pxToRem(translationCoordinates.x) + "rem - 50%), calc(" + this.pxToRem(translationCoordinates.y - 10) + "rem - 50%), 0px)"
 
 
     }

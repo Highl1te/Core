@@ -1,4 +1,5 @@
 import { ContextMenuHelper } from "./helpers/ContextMenuHelpers";
+import { NotificationHelper } from "./helpers/NotificationHelper";
 import { PluginLoader } from "./pluginLoader";
 import { Settings } from "./settings";
 
@@ -37,6 +38,7 @@ export class Highlite {
         this.registerClass("$z", "GameEngine");
         this.registerClass("LF", "MainPlayer");
         this.registerClass("tR", "GameCameraManager");
+        this.registerClass("RX", "HealthBar")
 
         // Needs Naming
         this.registerClass("AF", "AF");
@@ -50,6 +52,7 @@ export class Highlite {
         this.registerClassHook("SocketManager", "_handleLoggedOut");
         this.registerClassHook("SocketManager", "_handleEnteredIdleStateAction");
         this.registerClassHook("EntityManager", "addOtherPlayer");
+        this.registerClassHook("HealthBar", "_updateCurrentHealthbarColor");
 
         // Needs Naming
         this.registerClassHook("AF", "addItemToInventory");
@@ -59,6 +62,7 @@ export class Highlite {
         this.registerClassHook("ItemManager", "invokeInventoryAction");
 
         
+        NotificationHelper.askNotificationPermission();
         /*
          Post-Hooking, we tell HighSpell Client to start by re-running DOMContentLoaded
          Highlite Loader removes the client so it does not get a chance to see this event before now.

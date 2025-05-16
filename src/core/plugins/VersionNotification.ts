@@ -1,3 +1,4 @@
+import { NotificationHelper } from "../helpers/NotificationHelper";
 import { Plugin } from "../interfaces/plugin.class";
 let pJSON = require('../../../package.json');
 
@@ -23,7 +24,6 @@ export class VersionNotification extends Plugin {
         if (!this.highliteVersionElement) {
             return;
         }
-
         this.highliteVersionElement.style.visibility = 'hidden'
     }
 
