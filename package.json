@@ -11,6 +11,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@babylonjs/core": "^8.7.0"
+    "@babylonjs/core": "^8.7.0",
+    "idb": "^8.0.3"
   }
 }

@@ -1,4 +1,4 @@
-import type { PluginLoader } from "./pluginLoader"
+import { Highlite } from "./core"
 
 declare global {
     interface Window {
@@ -7,7 +7,7 @@ declare global {
 
     interface Document {
         highlite: {
-            pluginLoader: PluginLoader,
+            highlite: Highlite,
             [key: string]: any,
         },
 

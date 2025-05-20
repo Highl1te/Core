@@ -9,8 +9,7 @@ export class RefreshWarning extends Plugin {
         enabled: {
             text: "Enabled",
             type: SettingsTypes.checkbox,
-            value: false,
-            default: false,
+            value: true,
             callback: () => { } //TODO 
         },
     }

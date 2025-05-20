@@ -9,21 +9,18 @@ export class HPAlert extends Plugin {
             text: "Enabled",
             type: SettingsTypes.checkbox,
             value: false,
-            default: false,
             callback: () => { } //TODO 
         },
         volume: {
             text: "Volume",
             type: SettingsTypes.range,
-            value: 0,
-            default: 0.5,
+            value: 0.5,
             callback: () => { } //TODO 
         },
         activationPercent: {
             text: "Activation Percent",
             type: SettingsTypes.range,
-            value: 0,
-            default: 0.5,
+            value: 0.5,
             callback: () => { } //TODO 
         },
     };

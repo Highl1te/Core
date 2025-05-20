@@ -16,11 +16,11 @@ if (process.env.NODE_ENV === 'development') {
 }
 // If in production mode, just run startHighlite()
 else {
-    startHighlite();
+   await startHighlite();
 }
 
 
-function startHighlite() {
+async function startHighlite() {
     // Initialize the Highlite instance
     const highlite = new Highlite();
 
@@ -33,5 +33,5 @@ function startHighlite() {
     highlite.pluginLoader.registerPlugin(EnhancedHPBars);
 
     // Start the highlite instance
-    highlite.start();
+    await highlite.start();
 }

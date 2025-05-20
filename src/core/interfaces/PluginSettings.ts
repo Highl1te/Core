@@ -7,6 +7,5 @@ export interface PluginSettings {
     text: string;
     type: SettingsTypes;
     value: boolean | number | string;
-    default: boolean | number | string;
     callback: Function;
 }

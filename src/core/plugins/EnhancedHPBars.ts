@@ -2,7 +2,7 @@ import { Plugin } from "../interfaces/plugin.class";
 
 export class EnhancedHPBars extends Plugin {
     pluginName: string = "EnhancedHPBars";
-    settings: { [key: string]: string | number | boolean; } = {};
+    settings = {};
 
     targetContainer : HTMLDivElement | null = null;
     nameDiv : HTMLDivElement | null = null;

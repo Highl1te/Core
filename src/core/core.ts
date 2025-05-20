@@ -1,3 +1,4 @@
+import { Database } from "../database";
 import { ContextMenuHelper } from "./helpers/ContextMenuHelpers";
 import { NotificationHelper } from "./helpers/NotificationHelper";
 import { PluginLoader } from "./pluginLoader";
@@ -5,18 +6,21 @@ import { Settings } from "./settings";
 
 export class Highlite {
     pluginLoader = new PluginLoader;
+    database = new Database;
     settings = new Settings;
     contextMenuHelper = new ContextMenuHelper;
 
     constructor() {
         console.info("[Highlite] Core Initializing!");
 
-        document.highlite = {};
+        document.highlite = {highlite: this};
         document.highlite.Helpers = {};
         document.highlite.Helpers.ContextMenu = this.contextMenuHelper;
         document.highlite.gameHooks = {};
         document.highlite.gameHooks.Classes = {};
         document.highlite.gameHooks.Listeners = {};
+
+        this.settings = new Settings;
 
         // Listeners Hook-In
         // this.attachListeners("NI");
@@ -73,9 +77,17 @@ export class Highlite {
         }));
     }
 
-    start() {
+    async start() {
         console.info("[Highlite] Core Started!");
-        this.settings.registerPlugins();
+        await this.database.initDB();
+        if (this.database.database) {
+            console.info("[Highlite] Database Started!");
+        } else {
+            console.error("[Highlite] Database Failed exiting...");
+            return;
+        }
+        this.settings.init();
+        await this.settings.registerPlugins();
         this.pluginLoader.initAll();
         this.pluginLoader.postInitAll();
         this.pluginLoader.startAll();
