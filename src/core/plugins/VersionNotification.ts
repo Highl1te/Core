@@ -4,10 +4,12 @@ let pJSON = require('../../../package.json');
 
 
 export class VersionNotification extends Plugin {
-    pluginName: string = "VersionNotification";
+    pluginName: string = "Version Notification";
     highliteVersionElement : HTMLButtonElement | null = null;
 
-    settings = {};
+    settings = {
+        enable: true
+    };
 
     init(): void {
         this.log('Initializing');
@@ -21,6 +23,10 @@ export class VersionNotification extends Plugin {
     }
 
     SocketManager_loggedIn(...args : any) {
+        if (!this.settings.enable) {
+            return;
+        }
+
         if (!this.highliteVersionElement) {
             return;
         }
@@ -28,6 +34,10 @@ export class VersionNotification extends Plugin {
     }
 
     SocketManager_handleLoggedOut(...args : any) {
+        if (!this.settings.enable) {
+            return;
+        }
+
         if (!this.highliteVersionElement) {
             return;
         }
@@ -36,11 +46,19 @@ export class VersionNotification extends Plugin {
     }
     
     start(): void {
-        this.log("Started");
+        if (!this.settings.enable) {
+            return;
+        }
+
+        if (!this.highliteVersionElement) {
+            return;
+        }
+        // Re-add the element to the DOM
+        document.getElementById('game-container')?.appendChild(this.highliteVersionElement);
     }
 
     stop(): void {
-        this.log("Stopped");
+        this.highliteVersionElement?.remove();
     }
 
 }

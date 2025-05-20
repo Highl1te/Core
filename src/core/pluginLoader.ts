@@ -11,7 +11,7 @@ export class PluginLoader {
         const pluginInstance = new pluginClass();
         console.info(`[Highlite] New plugin ${pluginInstance.pluginName} registered`);
 
-        document.highlite[pluginInstance.pluginName] = pluginInstance
+        document.highlite.plugins.push(pluginInstance);
         this.plugins.push(pluginInstance);
 
         return true;

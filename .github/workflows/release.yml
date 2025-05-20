@@ -38,5 +38,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           # Tag to create/move and use for the release
           tag: "v${{ env.version }}"
+          name: "v${{ env.version }}"
+          body: "Highlite Core Release v${{ env.version }}"
           # Files to attach; newline seperated, recursive globbing supported
           files: dist/highliteCore.js

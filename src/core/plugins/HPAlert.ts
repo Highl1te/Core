@@ -3,9 +3,9 @@ import { Plugin } from "../interfaces/plugin.class";
 import { SettingsTypes } from "../interfaces/PluginSettings";
 
 export class HPAlert extends Plugin {
-    pluginName: string = "HPAlert";
+    pluginName: string = "HP Alert";
     settings = {
-        enabled: {
+        enable: {
             text: "Enabled",
             type: SettingsTypes.checkbox,
             value: false,
@@ -24,7 +24,6 @@ export class HPAlert extends Plugin {
             callback: () => { } //TODO 
         },
     };
-    doNotify = true;
 
     init(): void {
         this.log("Initializing");
@@ -40,6 +39,9 @@ export class HPAlert extends Plugin {
 
 
     GameLoop_update(...args: any) {
+        if (!this.settings.enable) {
+            return;
+        }
         const player = this.gameHooks.Classes.EntityManager.Instance._mainPlayer;
 
         if (player === undefined) {
@@ -50,10 +52,10 @@ export class HPAlert extends Plugin {
             return;
         }
 
-        if ((player._hitpoints._currentLevel / player._hitpoints._level) < 0.5) {
+        if ((player._hitpoints._currentLevel / player._hitpoints._level) < (this.settings.activationPercent / 100)) {
             const ctx = new AudioContext();
             const gain = ctx.createGain();
-            gain.gain.value = 0.1;
+            gain.gain.value = (this.settings.volume / 100);
             gain.connect(ctx.destination);
 
             // First chirp
@@ -71,7 +73,7 @@ export class HPAlert extends Plugin {
             osc2.connect(gain);
             osc2.start(ctx.currentTime + 0.25);
             osc2.stop(ctx.currentTime + 0.45); // Another 0.2-second chirp
-            if (this.doNotify) {
+            if (this.doNotify && this.settings.notification) {
                 this.doNotify = false;
                 NotificationHelper.showNotification(`${player._name} is low on health!`);
             }

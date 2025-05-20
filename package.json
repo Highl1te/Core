@@ -1,9 +1,7 @@
 {
   "name": "core",
+  "version": "0.1.1",
   "module": "index.ts",
-  "version": "0.0.5",
-  "type": "module",
-  "private": true,
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -13,5 +11,7 @@
   "dependencies": {
     "@babylonjs/core": "^8.7.0",
     "idb": "^8.0.3"
-  }
+  },
+  "private": true,
+  "type": "module"
 }

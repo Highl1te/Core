@@ -75,6 +75,49 @@ export class ContextMenuHelper {
         return actionNumber;
     }
 
+    RemoveGameWorldMenuAction(actionName : string, handleFunction : Function, entityType: EntityType = EntityType.Any) {
+        if (this.gameWorldActions[entityType] && this.gameWorldActions[entityType][actionName]) {
+            const actionInfo = this.gameWorldActions[entityType][actionName];
+            const index = actionInfo.handleFunctions.indexOf(handleFunction);
+            if (index > -1) {
+                actionInfo.handleFunctions.splice(index, 1);
+            }
+        }
+
+        // If no handle functions left, remove the action
+        if (this.gameWorldActions[entityType] && this.gameWorldActions[entityType][actionName] && this.gameWorldActions[entityType][actionName].handleFunctions.length === 0) {
+            delete this.gameWorldActions[entityType][actionName];
+        }
+
+        if (Object.keys(this.gameWorldActions[entityType]).length === 0) {
+            delete this.gameWorldActions[entityType];
+        }
+        return true;
+    }
+
+    RemoveInventoryItemMenuAction(actionName : string, handleFunction : Function, actionState : ActionState = ActionState.Any, contextMenuType: ContextMenuTypes) {
+        if (this.inventoryActions[contextMenuType] && this.inventoryActions[contextMenuType][actionState] && this.inventoryActions[contextMenuType][actionState][actionName]) {
+            const actionInfo = this.inventoryActions[contextMenuType][actionState][actionName];
+            const index = actionInfo.handleFunctions.indexOf(handleFunction);
+            if (index > -1) {
+                actionInfo.handleFunctions.splice(index, 1);
+            }
+        }
+        
+        // If no handle functions left, remove the action
+        if (this.inventoryActions[contextMenuType] && this.inventoryActions[contextMenuType][actionState] && this.inventoryActions[contextMenuType][actionState][actionName] && this.inventoryActions[contextMenuType][actionState][actionName].handleFunctions.length === 0) {
+            delete this.inventoryActions[contextMenuType][actionState][actionName];
+        }
+
+        if (Object.keys(this.inventoryActions[contextMenuType][actionState]).length === 0) {
+            delete this.inventoryActions[contextMenuType][actionState];
+        }
+        return true;
+    }
+    
+
+
+
     AddSpellMenuAction(actionName : string) : number {
         return -1;
     }

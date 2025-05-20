@@ -15,19 +15,11 @@ await Bun.build({
     outdir: './dist',
     naming: 'highliteCore.js',
     minify: true,
-    define: {
-        'process.env.NODE_ENV': JSON.stringify('production'),
-    },
 });
-
 
 await Bun.build({
     entrypoints: ['./src/index.ts'],
     outdir: './dist',
     naming: 'highliteCoreStandalone.user.js',
-    define: {
-        'process.env.NODE_ENV': JSON.stringify('development'),
-    },
     banner: UserBannerStandalone
 })
-

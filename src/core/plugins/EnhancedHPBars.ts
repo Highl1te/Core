@@ -1,14 +1,24 @@
 import { Plugin } from "../interfaces/plugin.class";
+import { SettingsTypes } from "../interfaces/PluginSettings";
 
 export class EnhancedHPBars extends Plugin {
-    pluginName: string = "EnhancedHPBars";
-    settings = {};
+    pluginName: string = "Enhanced HP Bars";
+    settings = {
+        enable: {
+            text: "Enabled",
+            type: SettingsTypes.checkbox,
+            value: true,
+            callback: () => { } //TODO 
+        }
+    };
 
-    targetContainer : HTMLDivElement | null = null;
-    nameDiv : HTMLDivElement | null = null;
-    healthBarBack : HTMLDivElement | null = null;
-    healthBarFront : HTMLDivElement | null = null;
-    healthText : HTMLSpanElement | null = null;
+    targetContainer: HTMLDivElement | null = null;
+    previousTarget: any | null = null;
+    lostTargetTime: number | null = null;
+    nameDiv: HTMLDivElement | null = null;
+    healthBarBack: HTMLDivElement | null = null;
+    healthBarFront: HTMLDivElement | null = null;
+    healthText: HTMLSpanElement | null = null;
 
     init(): void {
         this.log("Initializing");
@@ -16,13 +26,20 @@ export class EnhancedHPBars extends Plugin {
 
     start(): void {
         this.log("Started");
+        if (this.settings.enable && this.targetContainer !== null) {
+            // Re-add the element to the DOM
+            document.getElementById('hs-screen-mask')?.appendChild(this.targetContainer);
+        }
     }
 
     stop(): void {
-        this.log("Stopped");
+        this.targetContainer?.remove();
     }
 
-    SocketManager_loggedIn(...args : any) {
+    SocketManager_loggedIn(...args: any) {
+        if (!this.settings.enable) {
+            return;
+        }
         this.targetContainer = document.createElement('div');
         this.targetContainer.id = "highlite-target-container";
         this.targetContainer.className = "hs-menu hs-game-menu";
@@ -89,16 +106,36 @@ export class EnhancedHPBars extends Plugin {
     }
 
     GameLoop_draw() {
+        if (!this.settings.enable) {
+            return;
+        }
+
         if (!this.targetContainer || !this.nameDiv || !this.healthBarBack || !this.healthText || !this.healthBarFront) {
             return;
         }
 
-        const target = this.gameHooks.Classes.EntityManager.Instance.MainPlayer._currentTarget;
-        if (target && target._def._combat) {
+        const target = this.gameHooks.Classes.EntityManager.Instance.MainPlayer.CurrentTarget;
+        if (target && target.Def && target.Def.Combat) {
             this.targetContainer.style.visibility = "visible";
-            this.nameDiv.innerText = target._name;
-            this.healthText.innerText = `${target._hitpoints._currentLevel}/${target._hitpoints._level}`;
-            this.healthBarFront.style.width = `${(target._hitpoints._currentLevel / target._hitpoints._level) * 100}%`;
+            this.nameDiv.innerText = target.Name;
+            this.healthText.innerText = `${target.Hitpoints.CurrentLevel}/${target.Hitpoints.Level}`;
+            this.healthBarFront.style.width = `${(target.Hitpoints.CurrentLevel / target.Hitpoints.Level) * 100}%`;
+            this.previousTarget = target;
+            this.lostTargetTime = null;
+        } else if (!target && this.previousTarget && this.previousTarget.Def && this.previousTarget.Def.Combat) {
+            if (!this.lostTargetTime) {
+                this.lostTargetTime = Date.now();
+            }
+            if ((Date.now() - this.lostTargetTime) >= 20000) {
+                this.lostTargetTime = null;
+                this.previousTarget = null;
+                return;
+            }
+            this.targetContainer.style.visibility = "visible";
+            this.nameDiv.innerText = this.previousTarget.Name;
+            this.healthText.innerText = `${this.previousTarget.Hitpoints.CurrentLevel}/${this.previousTarget.Hitpoints.Level}`;
+            this.healthBarFront.style.width = `${(this.previousTarget.Hitpoints.CurrentLevel / this.previousTarget.Hitpoints.Level) * 100}%`;
+
         } else {
             this.targetContainer.style.visibility = "hidden";
         }

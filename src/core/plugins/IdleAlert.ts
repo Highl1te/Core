@@ -1,15 +1,41 @@
 import { Plugin } from "../interfaces/plugin.class";
 import { ActionState } from "../interfaces/game/actionStates.enum.ts";
 import { NotificationHelper } from "../helpers/NotificationHelper.ts";
+import { SettingsTypes } from "../interfaces/PluginSettings.ts";
 
 export class IdleAlert extends Plugin {
-    pluginName: string = "IdleAlert";
-    settings = {};
+    pluginName: string = "Idle Alert";
+    settings = {
+        enable: {
+            text: "Enabled",
+            type: SettingsTypes.checkbox,
+            value: false,
+            callback: () => { } //TODO 
+        },
+        volume: {
+            text: "Volume",
+            type: SettingsTypes.range,
+            value: 50,
+            callback: () => { } //TODO 
+        },
+        activationTicks: {
+            text: "Activation Ticks",
+            type: SettingsTypes.range,
+            value: 0.5,
+            callback: () => { } //TODO 
+        },
+        notification: {
+            text: "Notification",
+            type: SettingsTypes.checkbox,
+            value: false,
+            callback: () => { } //TODO 
+        },
+    };
 
-    ignoredStates: ActionState[] = [ActionState.BankingState, ActionState.ClimbSameMapLevelState, ActionState.GoThroughDoorState, ActionState.PlayerLoggingOutState, ActionState.PlayerDeadState, ActionState.StunnedState];
-    actionState : number = ActionState.IdleState;
-    idleTicks : number = 0;
-    shouldTick : boolean = false;
+    ignoredStates: ActionState[] = [ActionState.BankingState, ActionState.ClimbSameMapLevelState, ActionState.GoThroughDoorState, ActionState.PlayerLoggingOutState, ActionState.PlayerDeadState, ActionState.StunnedState, ActionState.TradingState];
+    actionState: number = ActionState.IdleState;
+    idleTicks: number = 0;
+    shouldTick: boolean = false;
 
     init(): void {
         this.log("Initialized");
@@ -21,16 +47,10 @@ export class IdleAlert extends Plugin {
         this.log("Stopped");
     }
 
-    SocketManager_handleLoggedOut(...args : any) {
-    if (!this.highliteVersionElement) {
-        return;
-    }
-
-    this.highliteVersionElement.style.visibility = 'visible'
-    }
-    
-
-    GameLoop_update(...args : any) {
+    GameLoop_update(...args: any) {
+        if (!this.settings.enable) {
+            return;
+        }
         const player = this.gameHooks.Classes.EntityManager.Instance._mainPlayer;
 
         if (player === undefined) {
@@ -61,12 +81,12 @@ export class IdleAlert extends Plugin {
             this.idleTicks = 0;
         }
 
-        if (this.idleTicks > 20) {
+        if (this.idleTicks > this.settings.activationTicks) {
             const ctx = new AudioContext();
             const gain = ctx.createGain();
-            gain.gain.value = 0.1;
+            gain.gain.value = this.settings.volume / 100;
             gain.connect(ctx.destination);
-            
+
             // First chirp
             const osc1 = ctx.createOscillator();
             osc1.type = 'triangle';
@@ -74,7 +94,7 @@ export class IdleAlert extends Plugin {
             osc1.connect(gain);
             osc1.start(ctx.currentTime);
             osc1.stop(ctx.currentTime + 0.2); // Chirp for 0.2 seconds
-            
+
             // Second chirp (starts after 0.25 seconds)
             const osc2 = ctx.createOscillator();
             osc2.type = 'triangle';
@@ -83,7 +103,9 @@ export class IdleAlert extends Plugin {
             osc2.start(ctx.currentTime + 0.25);
             osc2.stop(ctx.currentTime + 0.45); // Another 0.2-second chirp
 
-            NotificationHelper.showNotification(`${player._name} is idle!`);
+            if (this.settings.notification) {
+                NotificationHelper.showNotification(`${player._name} is idle!`);
+            }
             this.actionState = 0;
             this.idleTicks = 0;
         }

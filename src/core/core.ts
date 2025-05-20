@@ -3,12 +3,14 @@ import { ContextMenuHelper } from "./helpers/ContextMenuHelpers";
 import { NotificationHelper } from "./helpers/NotificationHelper";
 import { PluginLoader } from "./pluginLoader";
 import { Settings } from "./settings";
+import { SettingsManagement } from "./settingsManagement";
 
 export class Highlite {
     pluginLoader = new PluginLoader;
     database = new Database;
     settings = new Settings;
     contextMenuHelper = new ContextMenuHelper;
+    settingsManagement = new SettingsManagement;
 
     constructor() {
         console.info("[Highlite] Core Initializing!");
@@ -19,6 +21,8 @@ export class Highlite {
         document.highlite.gameHooks = {};
         document.highlite.gameHooks.Classes = {};
         document.highlite.gameHooks.Listeners = {};
+        document.highlite.plugins = [];
+        document.BABYLON = document.client.get("ro")
 
         this.settings = new Settings;
 
@@ -53,6 +57,8 @@ export class Highlite {
         this.registerClassHook("GameLoop", "_update");
         this.registerClassHook("GameLoop", "_draw");
         this.registerClassHook("SocketManager", "_loggedIn");
+        this.registerClassHook("SocketManager", "_loggedIn", this.postLogin);
+        this.registerClassHook("SocketManager", "_handleLoggedOut", this.postLogout);
         this.registerClassHook("SocketManager", "_handleLoggedOut");
         this.registerClassHook("SocketManager", "_handleEnteredIdleStateAction");
         this.registerClassHook("EntityManager", "addOtherPlayer");
@@ -89,6 +95,11 @@ export class Highlite {
         this.settings.init();
         await this.settings.registerPlugins();
         this.pluginLoader.initAll();
+
+        this.settingsManagement.init();
+        this.settingsManagement.setVisible(false);
+
+
         this.pluginLoader.postInitAll();
         this.pluginLoader.startAll();
     }
@@ -102,6 +113,16 @@ export class Highlite {
         console.info("[Highlite] Core Reloading");
         this.stop();
         this.start();
+    }
+
+    postLogin(...args) {
+        console.info("[Highlite] Post Login Hook");
+        this.settingsManagement.setVisible(true);
+    }
+    
+    postLogout(...args) {
+        console.info("[Highlite] Post Logout Hook");
+        this.settingsManagement.setVisible(false);
     }
 
     registerClass(sourceClass : string, mappedName : string) : boolean {

@@ -7,21 +7,22 @@ import { Nameplates } from "./core/plugins/Nameplates";
 import { RefreshWarning } from "./core/plugins/RefreshWarning";
 import { EnhancedHPBars } from "./core/plugins/EnhancedHPBars";
 
-// This instance self-inserts itself into document.highlite
+// Wait for document.client to be defined from the HighSpell client
+const waitForLoader = () => {
+    return new Promise((resolve) => {
+        const checkClient = () => {
+            if (document.client) {
+                resolve(true);
+            } else {
+                setTimeout(checkClient, 100);
+            }
+        };
+        checkClient();
+    });
+};
 
-
-// If in development mode, set a documnet variable to allow manual access to startHighlite() function, otherwise just run startHighlite()
-if (process.env.NODE_ENV === 'development') {
-    document.startHighlite = startHighlite;
-}
-// If in production mode, just run startHighlite()
-else {
-   await startHighlite();
-}
-
-
-async function startHighlite() {
-    // Initialize the Highlite instance
+// This waitForLoader self-inserts itself into document.highlite
+waitForLoader().then(async () => {
     const highlite = new Highlite();
 
     highlite.pluginLoader.registerPlugin(VersionNotification);
@@ -34,4 +35,5 @@ async function startHighlite() {
 
     // Start the highlite instance
     await highlite.start();
-}
+});
+
