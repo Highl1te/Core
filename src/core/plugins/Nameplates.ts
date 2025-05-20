@@ -25,11 +25,15 @@ export class Nameplates extends Plugin {
         }
     };
 
+    DOMElement : HTMLDivElement | null = null;
+
     NampeplateContainer: HTMLDivElement | null = null;
     NPCDomElements: {
         [key: string]: HTMLDivElement
     } = {}
-    PlayerDomElements = {}
+    PlayerDomElements: {
+        [key: string]: HTMLDivElement
+    } = {}
 
 
     init(): void {
@@ -84,7 +88,7 @@ export class Nameplates extends Plugin {
 
 
         // Clear non-existing NPCs
-        if (NPCS.size == 0 || this.settings.enable == false || this.settings.npcNameplates == false) {
+        if (NPCS.size == 0 || this.settings.enable.value == false || this.settings.npcNameplates.value == false) {
             for (const key in this.NPCDomElements) {
                 this.NPCDomElements[key].remove();
                 delete this.NPCDomElements[key];
@@ -99,7 +103,7 @@ export class Nameplates extends Plugin {
 
 
         // Clear non-existing Players
-        if (Players.length == 0 || this.settings.enable == false || this.settings.playerNameplates == false) {
+        if (Players.length == 0 || this.settings.enable.value == false || this.settings.playerNameplates.value == false) {
             for (const key in this.PlayerDomElements) {
                 this.PlayerDomElements[key].remove();
                 delete this.PlayerDomElements[key];
@@ -190,7 +194,7 @@ export class Nameplates extends Plugin {
                     this.PlayerDomElements[player._entityId].style.zIndex = "1000";
                     this.PlayerDomElements[player._entityId].style.color = "white";
                     this.PlayerDomElements[player._entityId].innerHTML = player._name;
-                    document.getElementById('highlite-nameplates')?.appendChild(this.PlayerDomElements[player._entityId]);
+                    document.getElementById('highlite-nameplates')?.appendChild(this.PlayerDomElements[player._entityId] as HTMLDivElement);
                 }
 
                 // Check if Player is a friend

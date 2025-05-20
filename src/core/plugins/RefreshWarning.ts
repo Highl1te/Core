@@ -6,7 +6,7 @@ export class RefreshWarning extends Plugin {
     pluginName: string = "Refresh Warning";
 
     settings = {
-        enabled: {
+        enable: {
             text: "Enabled",
             type: SettingsTypes.checkbox,
             value: true,
@@ -20,7 +20,7 @@ export class RefreshWarning extends Plugin {
     
     start(): void {
         this.log("Started");
-        if (this.settings.enabled) {
+        if (this.settings.enable) {
             this.enableWarning();
         }
     }

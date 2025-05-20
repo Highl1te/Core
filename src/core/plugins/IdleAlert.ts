@@ -81,10 +81,10 @@ export class IdleAlert extends Plugin {
             this.idleTicks = 0;
         }
 
-        if (this.idleTicks > this.settings.activationTicks) {
+        if (this.idleTicks > this.settings.activationTicks.value) {
             const ctx = new AudioContext();
             const gain = ctx.createGain();
-            gain.gain.value = this.settings.volume / 100;
+            gain.gain.value = this.settings.volume.value / 100;
             gain.connect(ctx.destination);
 
             // First chirp
