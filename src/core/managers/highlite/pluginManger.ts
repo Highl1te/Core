@@ -11,6 +11,7 @@ export class PluginManager {
         }
         PluginManager.instance = this;
         document.highlite.managers.PluginManager = this;
+        document.highlite.plugins = this.plugins;
     }
 
 
