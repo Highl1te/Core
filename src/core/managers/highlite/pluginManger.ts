@@ -1,16 +1,10 @@
+import { Manager } from "../../interfaces/highlite/manager.class";
 import type { Plugin } from "../../interfaces/highlite/plugin.class";
 
-export class PluginManager {
-    static instance: PluginManager;
+export class PluginManager extends Manager{
+    public name: string = "PluginManager";
+    
     plugins: Array<Plugin> = [];
-
-    constructor() {
-        if (PluginManager.instance) {
-            return PluginManager.instance;
-        }
-        PluginManager.instance = this;
-        document.highlite.plugins = this.plugins;
-    }
 
     registerPlugin<T extends Plugin>(pluginClass: new () => T): boolean {
         const pluginInstance = new pluginClass();

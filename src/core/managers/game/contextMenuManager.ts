@@ -1,5 +1,6 @@
 import { ActionState } from "../../interfaces/game/actionStates.enum";
 import { ContextMenuTypes } from "../../interfaces/game/contextMenuTypes.enum";
+import { Manager } from "../../interfaces/highlite/manager.class";
 
 export enum EntityType {
     Any = -1,
@@ -10,20 +11,13 @@ export enum EntityType {
     
 }
 
-export class ContextMenuManager {
-    private static instance : ContextMenuManager;
+export class ContextMenuManager extends Manager{
+    public name: string = "ContextMenuManager";
+
     defaultActions = {};
     inventoryActions = {};
     gameWorldActions = {};
     spellActions = {};
-
-    constructor() {
-        if (ContextMenuManager.instance) {
-            return ContextMenuManager.instance;
-        }
-        ContextMenuManager.instance = this;
-        document.highlite.managers.ContextMenu = this;
-    }
 
     AddDefaultMenuAction(actionName : string) : number {
         return -1;
