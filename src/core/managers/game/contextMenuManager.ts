@@ -22,6 +22,7 @@ export class ContextMenuManager {
             return ContextMenuManager.instance;
         }
         ContextMenuManager.instance = this;
+        document.highlite.managers.ContextMenu = this;
     }
 
     AddDefaultMenuAction(actionName : string) : number {
