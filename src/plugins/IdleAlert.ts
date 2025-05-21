@@ -32,7 +32,7 @@ export class IdleAlert extends Plugin {
         if (!this.settings.enable) {
             return;
         }
-        const player = this.gameHooks.Classes.EntityManager.Instance._mainPlayer;
+        const player = this.gameHooks.EntityManager.Instance._mainPlayer;
 
         if (player === undefined) {
             return;

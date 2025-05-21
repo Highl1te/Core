@@ -60,9 +60,9 @@ export class Nameplates extends Plugin {
     }
 
     GameLoop_draw() {
-        const NPCS = this.gameHooks.Classes.EntityManager.Instance._npcs; // Map
-        const Players = this.gameHooks.Classes.EntityManager.Instance._players; // Array
-        const playerCombatLevel = this.gameHooks.Classes.EntityManager.Instance.MainPlayer._combatLevel;
+        const NPCS = this.gameHooks.EntityManager.Instance._npcs; // Map
+        const Players = this.gameHooks.EntityManager.Instance._players; // Array
+        const playerCombatLevel = this.gameHooks.EntityManager.Instance.MainPlayer._combatLevel;
         const _W = document.client.get("_W");
         
 
@@ -177,7 +177,7 @@ export class Nameplates extends Plugin {
                 }
 
                 // Check if Player is a friend
-                const playerFriends = this.gameHooks.Classes.ChatManager.Instance._friends;
+                const playerFriends = this.gameHooks.ChatManager.Instance._friends;
                 for (const friend of playerFriends) {
                     if (friend == player._nameLowerCase) {
                         this.PlayerDomElements[player._entityId].style.color = "lightgreen";
@@ -201,10 +201,10 @@ export class Nameplates extends Plugin {
     updateElementPosition(e: any, t : any) {
         const translationCoordinates = document.BABYLON.Pq.Project(document.BABYLON.Pq.ZeroReadOnly, 
             e.getWorldMatrix(), 
-            this.gameHooks.Classes.GameEngine.Instance.Scene.getTransformMatrix(),
-            this.gameHooks.Classes.GameCameraManager.Camera.viewport.toGlobal(this.gameHooks.Classes.GameEngine.Instance.Engine.getRenderWidth(1), this.gameHooks.Classes.GameEngine.Instance.Engine.getRenderHeight(1)),
+            this.gameHooks.GameEngine.Instance.Scene.getTransformMatrix(),
+            this.gameHooks.GameCameraManager.Camera.viewport.toGlobal(this.gameHooks.GameEngine.Instance.Engine.getRenderWidth(1), this.gameHooks.GameEngine.Instance.Engine.getRenderHeight(1)),
         );
-        const camera =  this.gameHooks.Classes.GameCameraManager.Camera;
+        const camera =  this.gameHooks.GameCameraManager.Camera;
         // camera._scene._frustrumPlanes
         const isInFrustrum = camera.isInFrustum(e);
         if (!isInFrustrum) {
