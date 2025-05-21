@@ -11,19 +11,17 @@ export class Highlite {
 
     constructor() {
         console.info("[Highlite] Core Initializing!");
+
+        document.highlite = {};
+        document.highlite.managers = {};
+        document.highlite.gameHooks = {};
+        document.highlite.plugins = [];
+        document.BABYLON = document.client.get("ro")
+
         this.hookManager = new HookManager();
         this.contextMenuHelper = new ContextMenuManager();
         this.notificationManager = new NotificationManager();
         this.pluginManager = new PluginManager();
-
-        document.highlite = {};
-        document.highlite.Helpers = {};
-        document.highlite.Helpers.ContextMenu = this.contextMenuHelper;
-        document.highlite.gameHooks = {};
-        document.highlite.gameHooks.Classes = {};
-        document.highlite.gameHooks.Listeners = {};
-        document.highlite.plugins = [];
-        document.BABYLON = document.client.get("ro")
 
         this.hookManager.registerClass("Ck", "EntityManager");
         this.hookManager.registerClass("hN", "GroundItemManager");

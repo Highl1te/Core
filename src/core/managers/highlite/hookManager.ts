@@ -16,13 +16,13 @@ export class HookManager {
             return false;
         }
 
-        document.highlite.gameHooks.Classes[mappedName] = classInstance;
+        document.highlite.gameHooks[mappedName] = classInstance;
         return true;
     }
     
     public registerClassHook(sourceClass : string, fnName : string, hookFn = this.hook) : boolean {
         const self = this;
-        const classObject = document.highlite.gameHooks.Classes[sourceClass].prototype;
+        const classObject = document.highlite.gameHooks[sourceClass].prototype;
 
         if (!classObject) {
             console.warn(`[Highlite] Attempted to register unknown client class hook (${sourceClass}).`);
