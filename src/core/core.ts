@@ -56,8 +56,8 @@ export class Highlite {
 
         // Needs Naming
         this.hookManager.registerClassHook("AF", "addItemToInventory");
-        this.contextMenuManager.registerContextHook("vG", "_createInventoryItemContextMenuItems", this.contextMenuHelper.inventoryContextHook);
-        this.contextMenuManager.registerContextHook("vG", "_createGameWorldContextMenuItems", this.contextMenuHelper.gameWorldContextHook);
+        this.contextMenuManager.registerContextHook("vG", "_createInventoryItemContextMenuItems", this.contextMenuManager.inventoryContextHook);
+        this.contextMenuManager.registerContextHook("vG", "_createGameWorldContextMenuItems", this.contextMenuManager.gameWorldContextHook);
         this.hookManager.registerClassHook("ItemManager", "invokeInventoryAction");
         this.hookManager.registerStaticClassHook('dG', 'handleTargetAction');
     };
