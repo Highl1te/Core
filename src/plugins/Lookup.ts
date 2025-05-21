@@ -1,4 +1,4 @@
-import { EntityType } from "../core/managers/contextMenuManager";
+import { EntityType } from "../core/managers/game/contextMenuManager";
 import { Plugin } from "../core/interfaces/highlite/plugin.class";
 import { ActionState } from "../core/interfaces/game/actionStates.enum";
 import { ContextMenuTypes } from "../core/interfaces/game/contextMenuTypes.enum";
