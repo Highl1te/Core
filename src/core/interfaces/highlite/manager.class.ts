@@ -11,11 +11,11 @@ export abstract class Manager {
     }
 
     addToNamespace() {
-        if (document.highlite.manager[this.name]) {
+        if (document.highlite.managers[this.name]) {
             // Delete the old instance
             console.debug(`[Highlite] Deleting old instance of ${this.name}`);
-            delete document.highlite.manager[this.name];
+            delete document.highlite.managers[this.name];
         }
-        document.highlite.manager[this.name] = this;
+        document.highlite.managers[this.name] = this;
     }
 }
