@@ -30,7 +30,7 @@ waitForLoader().then(async () => {
     highlite.pluginLoader.registerPlugin(IdleAlert);
     highlite.pluginLoader.registerPlugin(Lookup);
     highlite.pluginLoader.registerPlugin(Nameplates);
-    highlite.pluginLoader.registerPlugin(RefreshWarning);
+//    highlite.pluginLoader.registerPlugin(RefreshWarning);
     highlite.pluginLoader.registerPlugin(EnhancedHPBars);
 
     // Start the highlite instance

@@ -1,21 +1,10 @@
-import { NotificationHelper } from "../helpers/NotificationHelper";
 import { Plugin } from "../interfaces/plugin.class";
-import { SettingsTypes } from "../interfaces/PluginSettings";
 let pJSON = require('../../../package.json');
 
 
 export class VersionNotification extends Plugin {
     pluginName: string = "Version Notification";
     highliteVersionElement: HTMLButtonElement | null = null;
-
-    settings = {
-        enable: {
-            text: "Enabled",
-            type: SettingsTypes.checkbox,
-            value: true,
-            callback: () => { } //TODO 
-        },
-    };
 
     init(): void {
         this.log('Initializing');
@@ -29,7 +18,7 @@ export class VersionNotification extends Plugin {
     }
 
     SocketManager_loggedIn(...args: any) {
-        if (!this.settings.enable) {
+        if (!this.settings.enable.value) {
             return;
         }
 
@@ -40,7 +29,7 @@ export class VersionNotification extends Plugin {
     }
 
     SocketManager_handleLoggedOut(...args: any) {
-        if (!this.settings.enable) {
+        if (!this.settings.enable.value) {
             return;
         }
 
@@ -52,7 +41,7 @@ export class VersionNotification extends Plugin {
     }
 
     start(): void {
-        if (!this.settings.enable) {
+        if (!this.settings.enable.value) {
             return;
         }
 

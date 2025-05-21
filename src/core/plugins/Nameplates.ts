@@ -3,29 +3,8 @@ import { SettingsTypes } from "../interfaces/PluginSettings";
 
 export class Nameplates extends Plugin {
     pluginName: string = "Nameplates";
-    settings = {
-        enable: {
-            text: "Enabled",
-            type: SettingsTypes.checkbox,
-            value: true,
-            callback: () => { } //TODO 
-        },
-        playerNameplates: {
-            text: "Player Nameplates",
-            type: SettingsTypes.checkbox,
-            value: true,
-            callback: () => { } //TODO 
 
-        },
-        npcNameplates: {
-            text: "NPC Nameplates",
-            type: SettingsTypes.checkbox,
-            value: true,
-            callback: () => { } //TODO 
-        }
-    };
-
-    DOMElement : HTMLDivElement | null = null;
+    DOMElement: HTMLDivElement | null = null;
 
     NampeplateContainer: HTMLDivElement | null = null;
     NPCDomElements: {
@@ -34,6 +13,23 @@ export class Nameplates extends Plugin {
     PlayerDomElements: {
         [key: string]: HTMLDivElement
     } = {}
+
+    constructor() {
+        super();
+        this.settings.playerNameplates = {
+            text: "Player Nameplates",
+            type: SettingsTypes.checkbox,
+            value: true,
+            callback: () => { } //NOOP
+
+        };
+        this.settings.npcNameplates = {
+            text: "NPC Nameplates",
+            type: SettingsTypes.checkbox,
+            value: true,
+            callback: () => { } //NOOP
+        };
+    }
 
 
     init(): void {
@@ -88,7 +84,7 @@ export class Nameplates extends Plugin {
 
 
         // Clear non-existing NPCs
-        if (NPCS.size == 0 || this.settings.enable.value == false || this.settings.npcNameplates.value == false) {
+        if (NPCS.size == 0 || this.settings.enable.value == false || this.settings.npcNameplates!.value== false) {
             for (const key in this.NPCDomElements) {
                 this.NPCDomElements[key].remove();
                 delete this.NPCDomElements[key];
@@ -103,7 +99,7 @@ export class Nameplates extends Plugin {
 
 
         // Clear non-existing Players
-        if (Players.length == 0 || this.settings.enable.value == false || this.settings.playerNameplates.value == false) {
+        if (Players.length == 0 || this.settings.enable.value == false || this.settings.playerNameplates!.value == false) {
             for (const key in this.PlayerDomElements) {
                 this.PlayerDomElements[key].remove();
                 delete this.PlayerDomElements[key];
@@ -123,12 +119,12 @@ export class Nameplates extends Plugin {
             }
         }
 
-        if (!this.settings.enable) {
+        if (!this.settings.enable.value) {
             return;
         }
 
         // Loop through all NPCs
-        if (this.settings.npcNameplates) {
+        if (this.settings.npcNameplates!.value) {
             for (const [key, value] of NPCS) {
                 const npc = value;
                 if (!this.NPCDomElements[key]) {
@@ -184,7 +180,7 @@ export class Nameplates extends Plugin {
             }
         }
 
-        if (this.settings.playerNameplates) {
+        if (this.settings.playerNameplates?.value) {
             for (const player of Players) {
                 if (!this.PlayerDomElements[player._entityId]) {
                     this.PlayerDomElements[player._entityId] = document.createElement('div');

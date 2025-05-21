@@ -1,16 +1,7 @@
 import { Plugin } from "../interfaces/plugin.class";
-import { SettingsTypes } from "../interfaces/PluginSettings";
 
 export class EnhancedHPBars extends Plugin {
     pluginName: string = "Enhanced HP Bars";
-    settings = {
-        enable: {
-            text: "Enabled",
-            type: SettingsTypes.checkbox,
-            value: true,
-            callback: () => { } //TODO 
-        }
-    };
 
     targetContainer: HTMLDivElement | null = null;
     previousTarget: any | null = null;
@@ -26,7 +17,7 @@ export class EnhancedHPBars extends Plugin {
 
     start(): void {
         this.log("Started");
-        if (this.settings.enable && this.targetContainer !== null) {
+        if (this.settings.enable.value && this.targetContainer !== null) {
             // Re-add the element to the DOM
             document.getElementById('hs-screen-mask')?.appendChild(this.targetContainer);
         }
@@ -37,7 +28,7 @@ export class EnhancedHPBars extends Plugin {
     }
 
     SocketManager_loggedIn(...args: any) {
-        if (!this.settings.enable) {
+        if (!this.settings.enable.value) {
             return;
         }
         this.targetContainer = document.createElement('div');
@@ -106,7 +97,7 @@ export class EnhancedHPBars extends Plugin {
     }
 
     GameLoop_draw() {
-        if (!this.settings.enable) {
+        if (!this.settings.enable.value) {
             return;
         }
 

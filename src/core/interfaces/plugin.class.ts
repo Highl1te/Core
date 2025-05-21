@@ -1,4 +1,4 @@
-import type { PluginSettings } from "./PluginSettings";
+import { SettingsTypes, type PluginSettings } from "./PluginSettings";
 
 export abstract class Plugin {
     abstract pluginName: string;
@@ -6,15 +6,22 @@ export abstract class Plugin {
     abstract init(): void;
     abstract start(): void;
     abstract stop(): void;
-    abstract settings: {
+    settings: {
         enable: PluginSettings;
         [key: string]: PluginSettings;
-    }
+    } = {
+        enable: {
+            text: "Enable",
+            type: SettingsTypes.checkbox,
+            value: true,
+            callback: this.onSettingsChanged_enabled
+        }
+    };
 
     postInit?(): void;
 
-    onSettingsChanged_enabled(enable: boolean) {
-        if (enable) {
+    onSettingsChanged_enabled() {
+        if (this.settings.enable.value) {
             this.start();
         } else {
             this.stop();

@@ -2,18 +2,11 @@ import { EntityType } from "../helpers/ContextMenuHelpers";
 import { Plugin } from "../interfaces/plugin.class";
 import { ActionState } from "../interfaces/game/actionStates.enum";
 import { ContextMenuTypes } from "../interfaces/game/contextMenuTypes.enum";
-import { SettingsTypes } from "../interfaces/PluginSettings";
 
 export class Lookup extends Plugin {
     pluginName: string = "Lookup";
-    settings = {
-        enable: {
-            text: "Enabled",
-            type: SettingsTypes.checkbox,
-            value: true,
-            callback: () => { } //TODO 
-        }
-    };
+
+    
     lookupContextActionInventory: number = 0;
     lookupContextActionEntities: number = 0;
 

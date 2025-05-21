@@ -4,34 +4,29 @@ import { SettingsTypes } from "../interfaces/PluginSettings";
 
 export class HPAlert extends Plugin {
     pluginName: string = "HP Alert";
-    settings = {
-        enable: {
-            text: "Enabled",
-            type: SettingsTypes.checkbox,
-            value: false,
-            callback: () => { } //TODO 
-        },
-        volume: {
+    doNotify = false;
+
+    constructor() {
+        super();
+        this.settings.volume = {
             text: "Volume",
             type: SettingsTypes.range,
             value: 0.5,
-            callback: () => { } //TODO 
-        },
-        activationPercent: {
+            callback: () => { } //NOOP
+        };
+        this.settings.activationPercent = {
             text: "Activation Percent",
             type: SettingsTypes.range,
             value: 0.5,
-            callback: () => { } //TODO 
-        },
-        notification: {
+            callback: () => { } //NOOP 
+        };
+        this.settings.notification = {
             text: "Notification",
             type: SettingsTypes.checkbox,
             value: false,
-            callback: () => { } //TODO 
-        },
-    };
-
-    doNotify = false;
+            callback: () => { } //NOOP 
+        }
+    }
 
     init(): void {
         this.log("Initializing");
@@ -47,7 +42,7 @@ export class HPAlert extends Plugin {
 
 
     GameLoop_update(...args: any) {
-        if (!this.settings.enable) {
+        if (!this.settings.enable.value) {
             return;
         }
         const player = this.gameHooks.Classes.EntityManager.Instance._mainPlayer;
@@ -60,10 +55,10 @@ export class HPAlert extends Plugin {
             return;
         }
 
-        if ((player._hitpoints._currentLevel / player._hitpoints._level) < (this.settings.activationPercent.value / 100)) {
+        if ((player._hitpoints._currentLevel / player._hitpoints._level) < ((this.settings.activationPercent!.value as number) / 100)) {
             const ctx = new AudioContext();
             const gain = ctx.createGain();
-            gain.gain.value = (this.settings.volume.value / 100);
+            gain.gain.value = ((this.settings.volume!.value as number) / 100);
             gain.connect(ctx.destination);
 
             // First chirp
@@ -81,7 +76,7 @@ export class HPAlert extends Plugin {
             osc2.connect(gain);
             osc2.start(ctx.currentTime + 0.25);
             osc2.stop(ctx.currentTime + 0.45); // Another 0.2-second chirp
-            if (this.doNotify && this.settings.notification.value) {
+            if (this.doNotify && (this.settings.notification!.value as boolean)) {
                 this.doNotify = false;
                 NotificationHelper.showNotification(`${player._name} is low on health!`);
             }

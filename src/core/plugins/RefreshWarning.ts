@@ -5,15 +5,6 @@ let pJSON = require('../../../package.json');
 export class RefreshWarning extends Plugin {
     pluginName: string = "Refresh Warning";
 
-    settings = {
-        enable: {
-            text: "Enabled",
-            type: SettingsTypes.checkbox,
-            value: true,
-            callback: () => { } //TODO 
-        },
-    }
-
     init(): void {
         this.log("Initializing");
     }
