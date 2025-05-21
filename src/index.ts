@@ -1,7 +1,6 @@
 import { Highlite } from "./core/core";
 import { HPAlert } from "./plugins/HPAlert";
 import { IdleAlert } from "./plugins/IdleAlert";
-import { VersionNotification } from "./plugins/VersionNotification";
 import { Lookup } from "./plugins/Lookup";
 import { Nameplates } from "./plugins/Nameplates";
 import { EnhancedHPBars } from "./plugins/EnhancedHPBars";
@@ -24,7 +23,6 @@ const waitForLoader = () => {
 waitForLoader().then(() => {
     const highlite = new Highlite();
 
-    highlite.pluginManager.registerPlugin(VersionNotification);
     highlite.pluginManager.registerPlugin(HPAlert);  
     highlite.pluginManager.registerPlugin(IdleAlert);
     highlite.pluginManager.registerPlugin(Lookup);
