@@ -1,4 +1,4 @@
-import { Plugin } from "../interfaces/plugin.class";
+import { Plugin } from "../core/interfaces/highlite/plugin.class";
 
 export class EnhancedHPBars extends Plugin {
     pluginName: string = "Enhanced HP Bars";

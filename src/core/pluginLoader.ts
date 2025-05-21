@@ -1,4 +1,4 @@
-import { Plugin } from "./interfaces/plugin.class";
+import { Plugin } from "./interfaces/highlite/plugin.class";
 
 export class PluginLoader {
     plugins : Array<Plugin> = []

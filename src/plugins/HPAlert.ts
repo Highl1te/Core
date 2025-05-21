@@ -1,5 +1,5 @@
-import { NotificationHelper } from "../helpers/NotificationHelper";
-import { Plugin } from "../interfaces/plugin.class";
+import { NotificationHelper } from "../core/managers/highlite/notificationManager";
+import { Plugin } from "../core/interfaces/highlite/plugin.class";
 
 export class HPAlert extends Plugin {
     pluginName: string = "HP Alert";

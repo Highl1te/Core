@@ -1,10 +1,10 @@
 import { Highlite } from "./core/core";
-import { HPAlert } from "./core/plugins/HPAlert";
-import { IdleAlert } from "./core/plugins/IdleAlert";
-import { VersionNotification } from "./core/plugins/VersionNotification";
-import { Lookup } from "./core/plugins/Lookup";
-import { Nameplates } from "./core/plugins/Nameplates";
-import { EnhancedHPBars } from "./core/plugins/EnhancedHPBars";
+import { HPAlert } from "./plugins/HPAlert";
+import { IdleAlert } from "./plugins/IdleAlert";
+import { VersionNotification } from "./plugins/VersionNotification";
+import { Lookup } from "./plugins/Lookup";
+import { Nameplates } from "./plugins/Nameplates";
+import { EnhancedHPBars } from "./plugins/EnhancedHPBars";
 
 // Wait for document.client to be defined from the HighSpell client
 const waitForLoader = () => {
@@ -24,12 +24,12 @@ const waitForLoader = () => {
 waitForLoader().then(() => {
     const highlite = new Highlite();
 
-    highlite.pluginLoader.registerPlugin(VersionNotification);
-    highlite.pluginLoader.registerPlugin(HPAlert);  
-    highlite.pluginLoader.registerPlugin(IdleAlert);
-    highlite.pluginLoader.registerPlugin(Lookup);
-    highlite.pluginLoader.registerPlugin(Nameplates);
-    highlite.pluginLoader.registerPlugin(EnhancedHPBars);
+    highlite.pluginManager.registerPlugin(VersionNotification);
+    highlite.pluginManager.registerPlugin(HPAlert);  
+    highlite.pluginManager.registerPlugin(IdleAlert);
+    highlite.pluginManager.registerPlugin(Lookup);
+    highlite.pluginManager.registerPlugin(Nameplates);
+    highlite.pluginManager.registerPlugin(EnhancedHPBars);
 
     // Start the highlite instance
     highlite.start();

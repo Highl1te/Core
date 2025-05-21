@@ -1,6 +1,6 @@
-import { Plugin } from "../interfaces/plugin.class";
-import { ActionState } from "../interfaces/game/actionStates.enum.ts";
-import { NotificationHelper } from "../helpers/NotificationHelper.ts";
+import { Plugin } from "../core/interfaces/highlite/plugin.class.ts";
+import { ActionState } from "../core/interfaces/game/actionStates.enum.ts";
+import { NotificationHelper } from "../core/managers/highlite/notificationManager.ts";
 
 export class IdleAlert extends Plugin {
     pluginName: string = "Idle Alert";

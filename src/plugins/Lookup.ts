@@ -1,7 +1,7 @@
-import { EntityType } from "../helpers/ContextMenuHelpers";
-import { Plugin } from "../interfaces/plugin.class";
-import { ActionState } from "../interfaces/game/actionStates.enum";
-import { ContextMenuTypes } from "../interfaces/game/contextMenuTypes.enum";
+import { EntityType } from "../core/managers/contextMenuManager";
+import { Plugin } from "../core/interfaces/highlite/plugin.class";
+import { ActionState } from "../core/interfaces/game/actionStates.enum";
+import { ContextMenuTypes } from "../core/interfaces/game/contextMenuTypes.enum";
 
 export class Lookup extends Plugin {
     pluginName: string = "Lookup";

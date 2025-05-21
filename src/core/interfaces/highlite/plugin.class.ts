@@ -11,14 +11,6 @@ export abstract class Plugin {
     
     postInit?(): void;
 
-    onSettingsChanged_enabled(enable : boolean) {
-        if (enable) {
-            this.start();
-        } else {
-            this.stop();
-        }
-    }
-
     gameHooks = document.highlite.gameHooks
 
     // Log seems to be broken from loading HighSpell Client

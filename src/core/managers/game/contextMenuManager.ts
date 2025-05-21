@@ -10,13 +10,19 @@ export enum EntityType {
     
 }
 
-export class ContextMenuHelper {
+export class ContextMenuManager {
+    private static instance : ContextMenuManager;
     defaultActions = {};
     inventoryActions = {};
     gameWorldActions = {};
     spellActions = {};
 
-
+    constructor() {
+        if (ContextMenuManager.instance) {
+            return ContextMenuManager.instance;
+        }
+        ContextMenuManager.instance = this;
+    }
 
     AddDefaultMenuAction(actionName : string) : number {
         return -1;
