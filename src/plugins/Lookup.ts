@@ -1,13 +1,11 @@
 import { EntityType } from "../core/managers/game/contextMenuManager";
-import { Plugin } from "../core/interfaces/highlite/plugin.class";
+import { Plugin } from "../core/interfaces/highlite/plugin/plugin.class";
 import { ActionState } from "../core/interfaces/game/actionStates.enum";
 import { ContextMenuTypes } from "../core/interfaces/game/contextMenuTypes.enum";
 
 export class Lookup extends Plugin {
     pluginName: string = "Lookup";
-    settings = {
-        enable: true,
-    };
+
     lookupContextActionInventory : number = 0;
     lookupContextActionEntities : number = 0;
 

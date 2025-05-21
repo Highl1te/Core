@@ -1,13 +1,21 @@
 import { ContextMenuManager } from "./managers/game/contextMenuManager";
 import { HookManager } from "./managers/highlite/hookManager";
 import { NotificationManager } from "./managers/highlite/notificationManager";
+import { PanelManager } from "./managers/highlite/panelManager";
 import { PluginManager } from "./managers/highlite/pluginManger";
+import { UIManager } from "./managers/highlite/uiManager";
+import { SettingsManager } from "./managers/highlite/settingsManager";
+import { DatabaseManager } from "./managers/highlite/databaseManager";
 
 export class Highlite {
     hookManager : HookManager;
     contextMenuManager : ContextMenuManager;
     notificationManager : NotificationManager;
     pluginManager : PluginManager;
+    uiManager : UIManager;
+    panelManager : PanelManager
+    settingsManager : SettingsManager;
+    databaseManager : DatabaseManager;
 
     constructor() {
         console.info("[Highlite] Core Initializing!");
@@ -22,6 +30,10 @@ export class Highlite {
         this.contextMenuManager = new ContextMenuManager();
         this.notificationManager = new NotificationManager();
         this.pluginManager = new PluginManager();
+        this.uiManager = new UIManager();
+        this.panelManager = new PanelManager();
+        this.settingsManager = new SettingsManager();
+        this.databaseManager = new DatabaseManager();
 
         this.hookManager.registerClass("Ck", "EntityManager");
         this.hookManager.registerClass("hN", "GroundItemManager");
@@ -47,8 +59,6 @@ export class Highlite {
         this.hookManager.registerClassHook("GameLoop", "_update");
         this.hookManager.registerClassHook("GameLoop", "_draw");
         this.hookManager.registerClassHook("SocketManager", "_loggedIn");
-        // this.hookManager.registerClassHook("SocketManager", "_loggedIn", this.postLogin);
-        // this.hookManager.registerClassHook("SocketManager", "_handleLoggedOut", this.postLogout);
         this.hookManager.registerClassHook("SocketManager", "_handleLoggedOut");
         this.hookManager.registerClassHook("SocketManager", "_handleEnteredIdleStateAction");
         this.hookManager.registerClassHook("EntityManager", "addOtherPlayer");
@@ -62,8 +72,17 @@ export class Highlite {
         this.hookManager.registerStaticClassHook('dG', 'handleTargetAction');
     };
 
-    start() {
+    async start() {
         console.info("[Highlite] Core Started!");
+        await this.databaseManager.initDB();
+        if (!this.databaseManager.database) {
+            console.error("[Highlite] Database not initialized!");
+            return;
+        } else {
+            console.info("[Highlite] Database initialized!");
+        }
+        this.settingsManager.init();
+        await this.settingsManager.registerPlugins();
         this.pluginManager.initAll();
         this.pluginManager.postInitAll();
         this.pluginManager.startAll();

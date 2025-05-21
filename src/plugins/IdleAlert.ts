@@ -1,17 +1,33 @@
-import { Plugin } from "../core/interfaces/highlite/plugin.class.ts";
+import { Plugin } from "../core/interfaces/highlite/plugin/plugin.class.ts";
+import { SettingsTypes } from "../core/interfaces/highlite/plugin/pluginSettings.interface.ts";
 import { ActionState } from "../core/interfaces/game/actionStates.enum.ts";
 import { NotificationManager } from "../core/managers/highlite/notificationManager.ts";
 
 export class IdleAlert extends Plugin {
     private notificationManager: NotificationManager = new NotificationManager();
-
     pluginName: string = "Idle Alert";
-    settings = {
-        enable: true,
-        volume: 50,
-        activationTicks: 20,
-        notification: true,
-    };
+
+    constructor() {
+        super();
+        this.settings.volume = {
+            text: "Volume",
+            type: SettingsTypes.range,
+            value: 50,
+            callback: () => { } //TODO 
+        };
+        this.settings.activationTicks = {
+            text: "Activation Ticks",
+            type: SettingsTypes.range,
+            value: 0.5,
+            callback: () => { } //TODO 
+        };
+        this.settings.notification = {
+            text: "Notification",
+            type: SettingsTypes.checkbox,
+            value: false,
+            callback: () => { } //TODO 
+        };
+    }
 
     ignoredStates: ActionState[] = [ActionState.BankingState, ActionState.ClimbSameMapLevelState, ActionState.GoThroughDoorState, ActionState.PlayerLoggingOutState, ActionState.PlayerDeadState, ActionState.StunnedState, ActionState.TradingState];
     actionState : number = ActionState.IdleState;
@@ -29,7 +45,7 @@ export class IdleAlert extends Plugin {
     }
     
     GameLoop_update(...args : any) {
-        if (!this.settings.enable) {
+        if (!this.settings.enable.value) {
             return;
         }
         const player = this.gameHooks.EntityManager.Instance._mainPlayer;
@@ -62,10 +78,10 @@ export class IdleAlert extends Plugin {
             this.idleTicks = 0;
         }
 
-        if (this.idleTicks > this.settings.activationTicks) {
+        if (this.idleTicks > (this.settings.activationTicks!.value as number)) {
             const ctx = new AudioContext();
             const gain = ctx.createGain();
-            gain.gain.value = this.settings.volume / 100;
+            gain.gain.value = (this.settings.volume!.value as number) / 100;
             gain.connect(ctx.destination);
             
             // First chirp
@@ -84,7 +100,7 @@ export class IdleAlert extends Plugin {
             osc2.start(ctx.currentTime + 0.25);
             osc2.stop(ctx.currentTime + 0.45); // Another 0.2-second chirp
 
-            if (this.settings.notification) {
+            if (this.settings.notification!.value) {
                 this.notificationManager.createNotification(`${player._name} is idle!`);
             }
             this.actionState = 0;

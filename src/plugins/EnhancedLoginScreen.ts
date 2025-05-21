@@ -1,10 +1,7 @@
-import { Plugin } from "../core/interfaces/highlite/plugin.class";
+import { Plugin } from "../core/interfaces/highlite/plugin/plugin.class";
 
 export class EnhancedLoginScreen extends Plugin {
     pluginName: string = "Enhanced Login Screen";
-    settings = {
-        enable: true,
-    };
 
     videoElement : HTMLVideoElement | null = null;
 
@@ -14,11 +11,11 @@ export class EnhancedLoginScreen extends Plugin {
     }
 
     start(): void {
-        this.videoElement!.style.visibility = "visible";
+        this.videoElement!.style.visibility = this.settings.enable.value ? "visible" : "hidden";
     }
 
     stop(): void {
-        this.videoElement!.style.visibility = "hidden";
+        this.videoElement!.style.visibility = this.settings.enable.value ? "visible" : "hidden";
     }
 
     SocketManager_loggedIn(...args: any) {
