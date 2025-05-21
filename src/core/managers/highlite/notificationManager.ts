@@ -1,8 +1,15 @@
-import { Manager } from "../../interfaces/highlite/manager.class";
-
-export class NotificationManager extends Manager {
+export class NotificationManager {
+    private static instance: NotificationManager;
     canNotify : boolean = false;
-    public name: string = "NotificationManager";
+
+    constructor() {
+        if (NotificationManager.instance) {
+            return NotificationManager.instance;
+        }
+        NotificationManager.instance = this;
+        document.highlite.managers.NotificationManager = this;
+    }
+
 
     createNotification(message: string, onClick : Function = () => { window.focus();}) : boolean {
         if (!this.canNotify) {

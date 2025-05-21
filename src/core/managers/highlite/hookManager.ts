@@ -1,7 +1,13 @@
-import { Manager } from "../../interfaces/highlite/manager.class";
+export class HookManager {
+    private static instance: HookManager;
 
-export class HookManager extends Manager {
-    public name: string = "HookManager";
+    constructor() {
+        if (HookManager.instance) {
+            return HookManager.instance;
+        }
+        HookManager.instance = this;
+        document.highlite.managers.HookManager = this;
+    }
 
     public registerClass(className: string, mappedName: string): boolean {
         const classInstance = document.client.get(className);

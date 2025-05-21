@@ -5,7 +5,7 @@ import { PluginManager } from "./managers/highlite/pluginManger";
 
 export class Highlite {
     hookManager : HookManager;
-    contextMenuHelper : ContextMenuManager;
+    contextMenuManager : ContextMenuManager;
     notificationManager : NotificationManager;
     pluginManager : PluginManager;
 
@@ -19,7 +19,7 @@ export class Highlite {
         document.BABYLON = document.client.get("ro")
 
         this.hookManager = new HookManager();
-        this.contextMenuHelper = new ContextMenuManager();
+        this.contextMenuManager = new ContextMenuManager();
         this.notificationManager = new NotificationManager();
         this.pluginManager = new PluginManager();
 
@@ -56,8 +56,8 @@ export class Highlite {
 
         // Needs Naming
         this.hookManager.registerClassHook("AF", "addItemToInventory");
-        this.contextMenuHelper.registerContextHook("vG", "_createInventoryItemContextMenuItems", this.contextMenuHelper.inventoryContextHook);
-        this.contextMenuHelper.registerContextHook("vG", "_createGameWorldContextMenuItems", this.contextMenuHelper.gameWorldContextHook);
+        this.contextMenuManager.registerContextHook("vG", "_createInventoryItemContextMenuItems", this.contextMenuHelper.inventoryContextHook);
+        this.contextMenuManager.registerContextHook("vG", "_createGameWorldContextMenuItems", this.contextMenuHelper.gameWorldContextHook);
         this.hookManager.registerClassHook("ItemManager", "invokeInventoryAction");
         this.hookManager.registerStaticClassHook('dG', 'handleTargetAction');
     };
