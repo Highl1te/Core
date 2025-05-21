@@ -1,7 +1,9 @@
-import { NotificationHelper } from "../core/managers/highlite/notificationManager";
+import { NotificationManager } from "../core/managers/highlite/notificationManager";
 import { Plugin } from "../core/interfaces/highlite/plugin.class";
 
 export class HPAlert extends Plugin {
+    private notificationManager: NotificationManager = new NotificationManager();
+    private doNotify: boolean = true;
     pluginName: string = "HP Alert";
     settings = {
         volume : 50,
@@ -60,7 +62,7 @@ export class HPAlert extends Plugin {
             osc2.stop(ctx.currentTime + 0.45); // Another 0.2-second chirp
             if (this.doNotify && this.settings.notification) {
                 this.doNotify = false;
-                NotificationHelper.showNotification(`${player._name} is low on health!`);
+                this.notificationManager.createNotification(`${player._name} is low on health!`);
             }
         } else {
             this.doNotify = true;

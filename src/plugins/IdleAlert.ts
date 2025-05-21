@@ -1,8 +1,10 @@
 import { Plugin } from "../core/interfaces/highlite/plugin.class.ts";
 import { ActionState } from "../core/interfaces/game/actionStates.enum.ts";
-import { NotificationHelper } from "../core/managers/highlite/notificationManager.ts";
+import { NotificationManager } from "../core/managers/highlite/notificationManager.ts";
 
 export class IdleAlert extends Plugin {
+    private notificationManager: NotificationManager = new NotificationManager();
+
     pluginName: string = "Idle Alert";
     settings = {
         enable: true,
@@ -83,7 +85,7 @@ export class IdleAlert extends Plugin {
             osc2.stop(ctx.currentTime + 0.45); // Another 0.2-second chirp
 
             if (this.settings.notification) {
-                NotificationHelper.showNotification(`${player._name} is idle!`);
+                this.notificationManager.createNotification(`${player._name} is idle!`);
             }
             this.actionState = 0;
             this.idleTicks = 0;
