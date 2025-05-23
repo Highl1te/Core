@@ -353,5 +353,7 @@ export class ContextMenuManager {
 
             return aPosition - bPosition;
         });
+
+        dG._mousePointActionsAndEntitiesResult._mainActionAndEntity = dG._mousePointActionsAndEntitiesResult._actionsAndEntities[0];
     }
 }
