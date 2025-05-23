@@ -73,10 +73,11 @@ export class HPAlert extends Plugin {
 
             // Check if any entity in localEntities (map object) .CurrentTarget is the player
             const isPlayerTargeted = localNPCs.entries().some(([_, npc]) => {
-                    if (npc.CurrentTarget === undefined || npc.CurrentTarget === null || npc.Combat == null) {
-                        return false;
+                    if (npc._currentTarget !== undefined && npc._currentTarget !== null && npc.Def.Combat != null && npc.Def.Combat != undefined) {
+                      if (npc._currentTarget._entityId == player._entityId) {
+                        return true;
+                      }
                     }
-                    return npc.CurrentTarget._id == player._id;
                 });
 
             if (this.settings.sound?.value && (isPlayerTargeted || (player.CurrentTarget !== undefined && player.CurrentTarget !== null && player.CurrentTarget.Combat != null && player.CurrentTarget != undefined))) {

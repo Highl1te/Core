@@ -45,7 +45,7 @@ export class PMAlerts extends Plugin {
 
 
     PrivateChatMessageList_addChatMessage(e: string, t: any, i: any, n: any, r: any, s: any, a: any, o: any, l: any, h: any) {
-        if (e.startsWith("From")) {
+        if (e !== undefined && e !== null && e.startsWith("From")) {
             if (this.settings.notification!.value as boolean) {
                 this.notificationManager.createNotification("You have received a private message from" + e.replace("From ", " "));
             }
