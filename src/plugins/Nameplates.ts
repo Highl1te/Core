@@ -250,7 +250,7 @@ export class Nameplates extends Plugin {
             t.style.visibility = "visible";
         }
 
-        t.style.transform = "translate3d(calc(" + this.pxToRem(translationCoordinates.x) + "rem - 50%), calc(" + this.pxToRem(translationCoordinates.y - 15) + "rem - 50%), 0px)"
+        t.style.transform = "translate3d(calc(" + this.pxToRem(translationCoordinates.x) + "rem - 50%), calc(" + this.pxToRem(translationCoordinates.y - 30) + "rem - 50%), 0px)"
 
 
     }
