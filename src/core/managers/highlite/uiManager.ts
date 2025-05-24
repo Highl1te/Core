@@ -50,7 +50,7 @@ export class UIManager {
         break;
       case UIManagerScope.ClientInternal:
         element.classList.add("highlite-ui-client-internal");
-        if (!document.getElementById("#hs-screen-mask")) {
+        if (!document.getElementById("hs-screen-mask")) {
             throw new Error("Highlite UI Manager: #hs-screen-mask not found");
         } else {
             document.getElementById("hs-screen-mask")?.appendChild(element);

@@ -8,6 +8,7 @@ import { EnhancedLoginScreen } from "./plugins/EnhancedLoginScreen";
 import { ContextMenuOptions } from "./plugins/ContextMenuOptions";
 import { TradeAlerts } from "./plugins/TradeAlerts";
 import { PMAlerts } from "./plugins/PMAlerts";
+import { CoinCounter } from "./plugins/CoinCounter";
 
 // Wait for document.client to be defined from the HighSpell client
 const waitForLoader = () => {
@@ -36,6 +37,7 @@ waitForLoader().then(() => {
     highlite.pluginManager.registerPlugin(ContextMenuOptions);
     highlite.pluginManager.registerPlugin(TradeAlerts);
     highlite.pluginManager.registerPlugin(PMAlerts);
+    highlite.pluginManager.registerPlugin(CoinCounter);
 
     // Start the highlite instance
     highlite.start();
