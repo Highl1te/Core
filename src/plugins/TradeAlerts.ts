@@ -44,7 +44,7 @@ export class TradeAlerts extends Plugin {
 
     SocketManager_handleTradeRequestedPacket(players : any) 
     {
-        if (players[0] !== this.gameHooks.EntityManager.Instance.MainPlayer.EntityID) {
+        if (players[0] !== this.gameHooks.EntityManager.Instance.MainPlayer.EntityID && players.includes(this.gameHooks.EntityManager.Instance.MainPlayer.EntityID)) {
           if (this.settings.notification!.value as boolean) {
             this.gameHooks.EntityManager.Instance.Players.forEach((player : any) => {
               if (player.EntityID === players[0]) {
