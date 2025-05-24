@@ -1,5 +1,5 @@
 import { Plugin } from '../../core/interfaces/highlite/plugin/plugin.class';
-import { ActionState } from '../../core/interfaces/game/actionStates.enum.ts';
+import { ActionState } from '../../core/interfaces/game/ActionStates.enum.ts';
 import { IdleOverlay } from './IdleOverlay.ts';
 import { NotificationManager } from '../../core/managers/highlite/notificationManager.ts';
 import { SoundManager } from '../../core/managers/highlite/soundsManager.ts';

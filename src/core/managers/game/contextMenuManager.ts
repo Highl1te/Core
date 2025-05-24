@@ -1,5 +1,5 @@
-import { ActionState } from "../../interfaces/game/actionStates.enum";
-import { ContextMenuTypes } from "../../interfaces/game/contextMenuTypes.enum";
+import { ActionState } from "../../interfaces/game/ActionStates.enum";
+import { ContextMenuTypes } from "../../interfaces/game/ContextMenuTypes.enum";
 
 export enum EntityType {
     Any = -1,
