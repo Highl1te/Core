@@ -9,5 +9,4 @@ export interface MainPlayer {
   _chatToken : string;
   _combat : Combat;
   _combatLevel : number;
-  _co
 }

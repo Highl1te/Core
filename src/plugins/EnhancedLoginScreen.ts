@@ -25,6 +25,8 @@ export class EnhancedLoginScreen extends Plugin {
 
     SocketManager_handleLoggedOut(...args: any) {
         this.log("Logged out");
-        this.videoElement!.style.visibility = "visible";
+        if (this.settings.enable.value) {
+            this.videoElement!.style.visibility = "visible";
+        }
     }
 }
