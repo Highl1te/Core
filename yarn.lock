@@ -5,6 +5,13 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
+"@babylonjs/core@npm:^8.9.0":
+  version: 8.9.0
+  resolution: "@babylonjs/core@npm:8.9.0"
+  checksum: 10c0/21def2cef12ad10de5bf7df2d345f70ce28b38807e9f8283dd83a4c6eabcfb1bc992bd3f0b7d37d5ca82c3cab59f2700fa18b90620af9a81e8ec15c3fc2783f4
+  languageName: node
+  linkType: hard
+
 "@esbuild/aix-ppc64@npm:0.25.4":
   version: 0.25.4
   resolution: "@esbuild/aix-ppc64@npm:0.25.4"
@@ -270,6 +277,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "highlitecore@workspace:."
   dependencies:
+    "@babylonjs/core": "npm:^8.9.0"
     esbuild: "npm:^0.25.4"
     idb: "npm:^8.0.3"
   languageName: unknown

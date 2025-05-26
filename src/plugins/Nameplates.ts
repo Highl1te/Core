@@ -1,3 +1,4 @@
+import { Vector3 } from "@babylonjs/core/Maths/math";
 import { Plugin } from "../core/interfaces/highlite/plugin/plugin.class"
 import { SettingsTypes } from "../core/interfaces/highlite/plugin/pluginSettings.interface";
 
@@ -236,7 +237,7 @@ export class Nameplates extends Plugin {
 
                         // Halo  // DIV Element
     updateElementPosition(e: any, t : any) {
-        const translationCoordinates = document.BABYLON.Pq.Project(document.BABYLON.Pq.ZeroReadOnly, 
+        const translationCoordinates = Vector3.Project(Vector3.ZeroReadOnly, 
             e.getWorldMatrix(), 
             this.gameHooks.GameEngine.Instance.Scene.getTransformMatrix(),
             this.gameHooks.GameCameraManager.Camera.viewport.toGlobal(this.gameHooks.GameEngine.Instance.Engine.getRenderWidth(1), this.gameHooks.GameEngine.Instance.Engine.getRenderHeight(1)),

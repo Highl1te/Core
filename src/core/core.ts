@@ -76,11 +76,16 @@ export class Highlite {
         this.hookManager.registerClassHook("ItemManager", "invokeInventoryAction");
 
         // Needs Naming
+        this.hookManager.registerStaticClassHook('dG', 'handleTargetAction');
+        this.hookManager.registerStaticClassHook('dG', 'getActionsAndEntitiesAtMousePointer');
         this.hookManager.registerClassHook("AF", "addItemToInventory");
         this.contextMenuManager.registerContextHook("vG", "_createInventoryItemContextMenuItems", this.contextMenuManager.inventoryContextHook);
         this.contextMenuManager.registerContextHook("vG", "_createGameWorldContextMenuItems", this.contextMenuManager.gameWorldContextHook);
-        this.hookManager.registerStaticClassHook('dG', 'handleTargetAction');
         this.hookManager.registerStaticClassHook('dG', 'getActionsAndEntitiesAtMousePointer', this.contextMenuManager.ActionSorting);
+
+
+
+        
 
         // Lookup Table Mappings
         document.highlite.gameLookups["GameWorldActions"] = document.client.get("VA");
