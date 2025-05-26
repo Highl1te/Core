@@ -27,7 +27,6 @@ export class Highlite {
         document.highlite.gameHooks = {};
         document.highlite.gameLookups = {};
         document.highlite.plugins = [];
-        document.BABYLON = document.client.get("ro")
 
         this.hookManager = new HookManager();
         this.contextMenuManager = new ContextMenuManager();
@@ -61,7 +60,6 @@ export class Highlite {
         this.hookManager.registerClass("AF", "AF"); // Unkown Name
         this.hookManager.registerClass("aG", "aG") // Unkown Name
         this.hookManager.registerClass("DW", "PrivateChatMessageList");
-        // this.hookManager.registerClass("cG", "cG") // Unkown Name
 
         // Function Hook-ins
         this.hookManager.registerClassHook("GameLoop", "_update");
