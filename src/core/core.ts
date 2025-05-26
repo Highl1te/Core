@@ -25,6 +25,7 @@ export class Highlite {
         document.highlite = {};
         document.highlite.managers = {};
         document.highlite.gameHooks = {};
+        document.highlite.gameLookups = {};
         document.highlite.plugins = [];
         document.BABYLON = document.client.get("ro")
 
@@ -38,6 +39,8 @@ export class Highlite {
         this.settingsManager = new SettingsManager();
         this.databaseManager = new DatabaseManager();
 
+
+        // Class Mappings
         this.hookManager.registerClass("Ck", "EntityManager");
         this.hookManager.registerClass("hN", "GroundItemManager");
         this.hookManager.registerClass("oF", "MeshManager");
@@ -70,14 +73,18 @@ export class Highlite {
         this.hookManager.registerClassHook("SocketManager", "_handleTradeRequestedPacket");
         this.hookManager.registerClassHook("EntityManager", "addOtherPlayer");
         this.hookManager.registerClassHook("HealthBar", "_updateCurrentHealthbarColor");
+        this.hookManager.registerClassHook("ItemManager", "invokeInventoryAction");
 
         // Needs Naming
         this.hookManager.registerClassHook("AF", "addItemToInventory");
         this.contextMenuManager.registerContextHook("vG", "_createInventoryItemContextMenuItems", this.contextMenuManager.inventoryContextHook);
         this.contextMenuManager.registerContextHook("vG", "_createGameWorldContextMenuItems", this.contextMenuManager.gameWorldContextHook);
-        this.hookManager.registerClassHook("ItemManager", "invokeInventoryAction");
         this.hookManager.registerStaticClassHook('dG', 'handleTargetAction');
         this.hookManager.registerStaticClassHook('dG', 'getActionsAndEntitiesAtMousePointer', this.contextMenuManager.ActionSorting);
+
+        // Lookup Table Mappings
+        document.highlite.gameLookups["GameWorldActions"] = document.client.get("VA");
+        document.highlite.gameLookups["InventoryActions"] = document.client.get("QA");
     };
 
     async start() {

@@ -32,6 +32,7 @@ export abstract class Plugin {
     postInit?(): void;
 
     gameHooks = document.highlite.gameHooks
+    gameLookups = document.highlite.gameLookups;
 
     // Log seems to be broken from loading HighSpell Client
     log(...args: any[]) : void {
