@@ -219,8 +219,6 @@ export class SettingsManager {
             contentRow.style.borderTop = '1px solid black';
             contentRow.style.borderBottom = '1px solid #444';
 
-            const settingName = document.createElement("h2");
-
             // Capitalize the first letter of the name 
             const capitalizedSettingName = settingKey.replace(/([A-Z])/g, " $1");
             const finalizedSettingName = capitalizedSettingName.charAt(0).toUpperCase() + capitalizedSettingName.slice(1);
