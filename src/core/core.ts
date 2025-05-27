@@ -88,6 +88,7 @@ export class Highlite {
         // Lookup Table Mappings
         document.highlite.gameLookups["GameWorldActions"] = document.client.get("VA");
         document.highlite.gameLookups["InventoryActions"] = document.client.get("QA");
+        document.highlite.gameLookups["Skills"] = document.client.get("bA");
     };
 
     async start() {

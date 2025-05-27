@@ -8,6 +8,10 @@ export class PanelManager {
 
     private currentMenuItem: string | null = null;
 
+    private barIcons : {
+        [key: string]: HTMLElement;
+    } = {};
+
     private barContentPages : {
         [key: string]: HTMLElement;
     } = {};
@@ -53,7 +57,6 @@ export class PanelManager {
         iconElement.classList.add("highlite_bar_item");
         iconElement.innerHTML = icon;
         iconElement.addEventListener("click", () => {
-            console.warn(`[Highlite] Bar Icon ${icon} clicked`);
             if (this.currentMenuItem === icon) {
                 this.highliteBarSelectedContent?.classList.remove("activated")
                 this.currentMenuItem = null;
@@ -83,6 +86,23 @@ export class PanelManager {
         
         const contentElement = document.createElement("div");
         this.barContentPages[icon] = contentElement;
+        this.barIcons[icon] = iconElement;
         return this.barContentPages[icon];
     }
+
+    removeMenuItem(icon: string) {
+        // Remove Icon and Content
+        if (!this.barIcons[icon] || !this.barContentPages[icon]) {
+            throw new Error(`[Highlite] Bar Icon ${icon} does not exist`);
+        }
+
+        this.highliteBar?.removeChild(this.barIcons[icon]);
+        delete this.barIcons[icon];
+
+        const contentElement = this.barContentPages[icon];
+        if (contentElement && contentElement.parentNode) {
+            contentElement.parentNode.removeChild(contentElement);
+        }
+        delete this.barContentPages[icon];
+    };
 }

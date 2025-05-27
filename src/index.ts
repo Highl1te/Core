@@ -9,6 +9,7 @@ import { ContextMenuOptions } from "./plugins/ContextMenuOptions";
 import { TradeAlerts } from "./plugins/TradeAlerts";
 import { PMAlerts } from "./plugins/PMAlerts";
 import { CoinCounter } from "./plugins/CoinCounter";
+import { ExperienceTracker } from "./plugins/ExperienceTracker";
 
 // Wait for document.client to be defined from the HighSpell client
 const waitForLoader = () => {
@@ -38,6 +39,7 @@ waitForLoader().then(() => {
     highlite.pluginManager.registerPlugin(TradeAlerts);
     highlite.pluginManager.registerPlugin(PMAlerts);
     highlite.pluginManager.registerPlugin(CoinCounter);
+    highlite.pluginManager.registerPlugin(ExperienceTracker);
 
     // Start the highlite instance
     highlite.start();
