@@ -85,6 +85,12 @@ export class PanelManager {
         this.highliteBar?.appendChild(iconElement);
         
         const contentElement = document.createElement("div");
+        contentElement.style.position = "absolute";
+        contentElement.style.top = "0";
+        contentElement.style.left = "0";
+        contentElement.style.overflowX = "hidden";
+        contentElement.style.overflowY = "scroll";
+        contentElement.style.height = "100%";
         this.barContentPages[icon] = contentElement;
         this.barIcons[icon] = iconElement;
         return this.barContentPages[icon];
