@@ -10,6 +10,7 @@ import { TradeAlerts } from "./plugins/TradeAlerts";
 import { PMAlerts } from "./plugins/PMAlerts";
 import { CoinCounter } from "./plugins/CoinCounter";
 import { ExperienceTracker } from "./plugins/ExperienceTracker";
+import { WorldMap } from "./plugins/Map";
 
 // Wait for document.client to be defined from the HighSpell client
 const waitForLoader = () => {
@@ -40,6 +41,7 @@ waitForLoader().then(() => {
     highlite.pluginManager.registerPlugin(PMAlerts);
     highlite.pluginManager.registerPlugin(CoinCounter);
     highlite.pluginManager.registerPlugin(ExperienceTracker);
+    highlite.pluginManager.registerPlugin(WorldMap);
 
     // Start the highlite instance
     highlite.start();

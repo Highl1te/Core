@@ -198,6 +198,10 @@ export class EnhancedHPBars extends Plugin {
             }
             this.targetContainer.style.visibility = "visible";
             this.nameDiv.innerText = this.previousTarget.Name;
+            if (!this.previousTarget.Hitpoints) {
+              this.previousTarget = null; // Target has likely died or is no longer in the current chunk.
+              return;
+            }
             this.healthText.innerText = `${this.previousTarget.Hitpoints.CurrentLevel}/${this.previousTarget.Hitpoints.Level}`;
             this.healthBarFront.style.width = `${(this.previousTarget.Hitpoints.CurrentLevel / this.previousTarget.Hitpoints.Level) * 100}%`;
         } else {

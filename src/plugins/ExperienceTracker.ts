@@ -5,7 +5,7 @@ import { PanelManager } from "../core/managers/highlite/panelManager";
 export class ExperienceTracker extends Plugin {
     pluginName: string = "Experience Tracker";
     panelManager : PanelManager = new PanelManager();
-    panelContent : HTMLElement | null = null;
+    panelContent : HTMLElement | undefined = undefined;
 
     levelToXP = {
         1: 0,
@@ -142,7 +142,11 @@ export class ExperienceTracker extends Plugin {
         if (!this.settings.enable.value) {
             return;
         }
-        this.panelContent = this.panelManager.requestMenuItem('📊', "Experience Tracker");
+        this.panelContent = this.panelManager.requestMenuItem('📊', "Experience Tracker")[1];
+        if (!this.panelContent) {
+            this.log(`Failed to create Experience Tracker panel`);
+            return;
+        }
         this.panelContent.style.display = "block";
         this.panelContent.style.flexDirection = "column";
         this.panelContent.style.width = "100%";
