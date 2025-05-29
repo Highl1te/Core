@@ -23,16 +23,6 @@ export class UIManager {
       case UIManagerScope.ClientRelative:
         element.classList.add("highlite-ui-client-relative");
 
-        // The game controls should not override our UI.
-        // element.addEventListener("click", (e) => {
-        //     e.stopPropagation();
-        // });
-        // element.addEventListener("focus", (e) => {
-        //     e.stopPropagation();
-        // });
-        // element.addEventListener("blur", (e) => {
-        //     e.stopPropagation();
-        // });
         element.addEventListener("keydown", (e) => {
             e.stopPropagation();
         });

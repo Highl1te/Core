@@ -62,7 +62,7 @@ export class SettingsManager {
     }
 
     private createMenu() {
-        this.panelContainer = this.panelManager.requestMenuItem("🛠️", "Settings") as HTMLDivElement;
+        this.panelContainer = this.panelManager.requestMenuItem("🛠️", "Settings")[1] as HTMLDivElement;
         this.panelContainer.style.display = 'flex';
         this.panelContainer.style.width = '100%';
 
@@ -218,8 +218,6 @@ export class SettingsManager {
             contentRow.style.alignItems = 'center';
             contentRow.style.borderTop = '1px solid black';
             contentRow.style.borderBottom = '1px solid #444';
-
-            const settingName = document.createElement("h2");
 
             // Capitalize the first letter of the name 
             const capitalizedSettingName = settingKey.replace(/([A-Z])/g, " $1");
