@@ -56,7 +56,7 @@ export class PanelManager {
         const iconElement = document.createElement("div");
         iconElement.classList.add("highlite_bar_item");
         iconElement.innerHTML = icon;
-        iconElement.addEventListener("click", () => {
+        iconElement.onclick = () => {
             if (this.currentMenuItem === icon) {
                 this.highliteBarSelectedContent?.classList.remove("activated")
                 this.currentMenuItem = null;
@@ -81,7 +81,7 @@ export class PanelManager {
                     contentElement.appendChild(pageContent);
                 }
             }
-        });
+        };
         this.highliteBar?.appendChild(iconElement);
         
         const contentElement = document.createElement("div");
@@ -93,7 +93,7 @@ export class PanelManager {
         contentElement.style.height = "100%";
         this.barContentPages[icon] = contentElement;
         this.barIcons[icon] = iconElement;
-        return this.barContentPages[icon];
+        return [this.barIcons[icon], this.barContentPages[icon]];
     }
 
     removeMenuItem(icon: string) {

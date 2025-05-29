@@ -62,7 +62,7 @@ export class SettingsManager {
     }
 
     private createMenu() {
-        this.panelContainer = this.panelManager.requestMenuItem("🛠️", "Settings") as HTMLDivElement;
+        this.panelContainer = this.panelManager.requestMenuItem("🛠️", "Settings")[1] as HTMLDivElement;
         this.panelContainer.style.display = 'flex';
         this.panelContainer.style.width = '100%';
 

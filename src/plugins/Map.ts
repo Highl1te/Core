@@ -4,84 +4,106 @@ import { PanelManager } from "../core/managers/highlite/panelManager";
 export class WorldMap extends Plugin {
     pluginName: string = "World Map";
     panelManager : PanelManager = new PanelManager();
-
+    mapWindow: HTMLDivElement | null = null;
+    mapEmbed: HTMLIFrameElement | null = null;
+    previousPosition : { X: number, Z: number } | null = null;
+    
     init(): void {
         this.log("Initializing");
     }
 
     start(): void {
         this.log("Started");
-        const contentDiv = this.panelManager.requestMenuItem("🗺️", "World Map");
-        
-        if (contentDiv) {
-            const mapButton = document.createElement("button");
-            mapButton.textContent = "Open World Map";
-            mapButton.style.width = "100%";
-            mapButton.style.height = "100%";
-            mapButton.style.fontSize = "16px";
-            mapButton.style.cursor = "pointer";
-            mapButton.onclick = () => {
-                this.doTest();
-            };
-            
-            contentDiv.appendChild(mapButton);
-            this.log("World Map panel created successfully.");
-        } else {
-            console.error("Failed to create World Map panel.");
-        }
-    }
-
-    doTest() {
-        // Create a window in the middle of the screen which embeds the map: https://highlite.fanet.dev/map
-        const mapWindow = document.createElement("div");
-        mapWindow.style.position = "fixed";
-        mapWindow.style.top = "50%";
-        mapWindow.style.left = "50%";
-        mapWindow.style.transform = "translate(-50%, -50%)";
-        mapWindow.style.width = "50%";
-        mapWindow.style.height = "50%";
-        mapWindow.style.backgroundColor = "white";
-        mapWindow.style.zIndex = "1000";
-        mapWindow.style.border = "2px solid black";
-        mapWindow.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.5)";
-        mapWindow.style.display = "flex";
-        mapWindow.style.justifyContent = "center";
-        mapWindow.style.alignItems = "center";
-        document.body.appendChild(mapWindow);
-
-
-        // Player Map Level, Player Map X, Player Map Y
-        if (!this.gameHooks.EntityManager.Instance.MainPlayer) {
-            this.log("Main player not found, cannot display map.");
+        if (!this.settings.enable.value) {
             return;
         }
 
-        const playerMapLevel = this.gameHooks.EntityManager.Instance.MainPlayer.CurrentMapLevel;
-        const playerMapPos = this.gameHooks.EntityManager.Instance.MainPlayer.CurrentGamePosition;
-        const mapLevelText = playerMapLevel == 1 ? "Overworld" : playerMapLevel == 0 ? "Underworld" : "Sky";
+        const mapMenuItems = this.panelManager.requestMenuItem("🗺️", "World Map");
+        if (!mapMenuItems) {
+            this.error("Failed to create World Map panel.");
+            return;
+        }
+        
+        const iconElement = mapMenuItems[0] as HTMLDivElement;
 
-        /* https://highlite.fanet.dev/map?lvl=Overworld&pos_x=500&pos_y=500 */
-        const embed = document.createElement("embed");
-        embed.src = `https://highlite.fanet.dev/map?lvl=${mapLevelText}&pos_x=${playerMapPos.X + 512}&pos_y=${playerMapPos.Z + 512}`;
+        iconElement.onclick = () => {
+            this.showMap();
+        }
+    }
+
+    showMap() {
+        if (!this.settings.enable.value) {
+          return;
+        }
+
+        if (this.mapWindow) {
+            this.log("Map window already exists, skipping creation.");
+            // If map is already visible, hide it, otherwise show it
+            if (this.mapWindow.style.visibility == "hidden") {
+                this.mapWindow.style.visibility = "visible";
+            } else {
+                this.mapWindow.style.visibility = "hidden";
+            }
+            return;
+        }
+        // Create a window in the middle of the screen which embeds the map: https://highlite.fanet.dev/map
+        this.mapWindow = document.createElement("div");
+        this.mapWindow.style.position = "fixed";
+        this.mapWindow.style.top = "50%";
+        this.mapWindow.style.left = "50%";
+        this.mapWindow.style.transform = "translate(-50%, -50%)";
+        this.mapWindow.style.width = "50%";
+        this.mapWindow.style.height = "50%";
+        this.mapWindow.style.backgroundColor = "white";
+        this.mapWindow.style.zIndex = "1000";
+        this.mapWindow.style.border = "2px solid black";
+        this.mapWindow.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.5)";
+        this.mapWindow.style.display = "flex";
+        this.mapWindow.style.justifyContent = "center";
+        this.mapWindow.style.alignItems = "center";
+        this.mapWindow.style.visibility = "visible";
+        this.mapWindow.style.borderRadius = "10px";
+        this.mapWindow.style.flexDirection = "column";
+        this.mapWindow.style.background = "rgba(16, 16, 16, 0.8)";
+        this.mapWindow.style.backdropFilter = "blur(5px)";
+        this.mapWindow.style.padding = "10px";
+        this.mapWindow.style.paddingTop = "0px";
+        document.body.appendChild(this.mapWindow);
+
+
+        // Window Title
+        const titleDiv = document.createElement("div");
+        titleDiv.style.display = "flex";
+        titleDiv.style.width = "100%";
+        titleDiv.style.flexDirection = "row";
+        titleDiv.style.padding = "5px";
+        titleDiv.style.justifyContent = "space-between";
+        this.mapWindow.appendChild(titleDiv);
+        const titleText = document.createElement("span");
+        titleText.textContent = "World Map";
+        titleText.style.fontFamily = "Inter";
+        titleText.style.color = "white";
+        titleDiv.appendChild(titleText);
+
+        const embed = document.createElement("iframe");
+        embed.src = `https://highlite.fanet.dev/map?hide_decor=true&pos_x=512&pos_y=512&lvl=Overworld`;
         embed.style.width = "100%";
         embed.style.height = "100%";
         embed.style.border = "none";
-        mapWindow.appendChild(embed);
-
-
+        embed.style.borderRadius = "10px";
+        embed.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.5)";
+        this.mapWindow.appendChild(embed);
+        this.mapEmbed = embed;
 
         // Add a close button to the map window
         /* <div style="position: absolute;top: -5px;right: -5px;z-index: 100000000;background: red;color: white;box-shadow: none;padding: 5px;font-family: 'Inter';height: 10px;width: 10px;overflow: visible;text-align: center;justify-content: center;display: flex;align-items: center;border-radius: 5px;text-shadow: 0px 0px 4px black;cursor: pointer;">✕</div>*/
         const closeButton = document.createElement("div");
-        closeButton.style.position = "absolute";
-        closeButton.style.top = "-5px";
-        closeButton.style.right = "-5px";
         closeButton.style.zIndex = "100000000";
         closeButton.style.background = "red";
         closeButton.style.color = "white";
         closeButton.style.boxShadow = "none";
         closeButton.style.padding = "5px";
-        closeButton.style.fontFamily = "'Inter'";
+        closeButton.style.fontFamily = "Inter";
         closeButton.style.height = "10px";
         closeButton.style.width = "10px";
         closeButton.style.overflow = "visible";
@@ -94,16 +116,52 @@ export class WorldMap extends Plugin {
         closeButton.style.cursor = "pointer";
         closeButton.textContent = "✕";
         closeButton.onclick = () => {
-            document.body.removeChild(mapWindow);
+            if (!this.mapWindow) return;
+            this.mapWindow.style.visibility = "hidden";
         };
         
-        mapWindow.appendChild(closeButton);
+        titleDiv.appendChild(closeButton);
 
+    }
+
+    GameLoop_update(...args : any) {
+      if (!this.mapWindow) return;
+      if (!this.mapEmbed) return;
+      if (!this.settings.enable.value) return;
+      if (!this.gameHooks.EntityManager) return;
+      if (!this.gameHooks.EntityManager.Instance) return;
+      if (!this.gameHooks.EntityManager.Instance.MainPlayer) return;
+      if (!this.gameHooks.EntityManager.Instance.MainPlayer.CurrentMapLevel) return;
+      if (!this.gameHooks.EntityManager.Instance.MainPlayer.CurrentGamePosition) return;
+      
+
+      const playerMapLevel = this.gameHooks.EntityManager.Instance.MainPlayer.CurrentMapLevel;
+      const playerMapPos = this.gameHooks.EntityManager.Instance.MainPlayer.CurrentGamePosition;
+      const mapLevelText = playerMapLevel == 1 ? "Overworld" : playerMapLevel == 0 ? "Underworld" : "Sky";
+
+      if (this.previousPosition != null && playerMapPos.X == this.previousPosition.X && playerMapPos.Z == this.previousPosition.Z) {
+        return; // No position change, no need to update
+      } else {
+        this.previousPosition = { X: playerMapPos.X, Z: playerMapPos.Z };
+      }
+
+      if (!this.mapEmbed.contentWindow) {
+        return; // No content window, cannot post message
+      }
+
+      this.mapEmbed.contentWindow.postMessage({ X:  playerMapPos.X + 512, Y: playerMapPos.Z + 512, lvl: mapLevelText}, "*");
     }
 
     stop(): void {
         this.log("Stopped");
+        if (this.mapWindow) {
+            document.body.removeChild(this.mapWindow);
+            this.mapWindow = null;
+        }
+        if (this.mapEmbed) {
+            this.mapEmbed.remove();
+            this.mapEmbed = null;
+        }
+        this.panelManager.removeMenuItem("🗺️");
     }
-
-
 }
