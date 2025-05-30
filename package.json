@@ -2,7 +2,7 @@
   "name": "highlitecore",
   "productName": "HighliteCore",
   "packageManager": "yarn@4.9.1",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
   "main": "src/index.ts",
   "devDependencies": {

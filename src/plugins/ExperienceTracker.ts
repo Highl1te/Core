@@ -1,5 +1,6 @@
 import { Plugin } from "../core/interfaces/highlite/plugin/plugin.class";
 import { PluginSettings } from "../core/interfaces/highlite/plugin/pluginSettings.interface";
+import { abbreviateValue } from "../core/utilities/abbreviateValue";
 import { PanelManager } from "../core/managers/highlite/panelManager";
 
 export class ExperienceTracker extends Plugin {
@@ -168,7 +169,11 @@ export class ExperienceTracker extends Plugin {
     }
 
     createSkillListing(skill) {
+
         const skillName : string = this.gameLookups["Skills"][skill._skill];
+        if (this.skillTrackers[skillName]) {
+            return; // Skill tracker already exists
+        }
         const skillIcon = this.skillToIcon[skillName];
 
 
@@ -184,6 +189,7 @@ export class ExperienceTracker extends Plugin {
         skillHeader.style.display = "flex";
         skillHeader.style.flexDirection = "row";
         skillHeader.style.padding = "5px 0px";
+        skillHeader.style.alignItems = "center";
         skillTracker.appendChild(skillHeader);
 
         const skillIconElement = document.createElement('div');
@@ -200,65 +206,138 @@ export class ExperienceTracker extends Plugin {
         
         const xpDetails = document.createElement('div');
         xpDetails.style.display = "flex";
-        xpDetails.style.flexDirection = "column";
+        xpDetails.style.flexDirection = "row";
         xpDetails.style.width = "100%";
         xpDetails.style.textWrapMode = "nowrap";
+        xpDetails.style.justifyContent = "space-around";
         skillHeader.appendChild(xpDetails);
 
 
         const xpDetailsLeft = document.createElement('div');
         xpDetailsLeft.style.display = "flex";
-        xpDetailsLeft.style.flexDirection = "row";
-        xpDetailsLeft.style.justifyContent = "space-around";
+        xpDetailsLeft.style.flexDirection = "column";
 
 
         const skillXPGained = document.createElement('div');
         skillXPGained.id = `skillXPGained`;
-        skillXPGained.textContent = `XP Gained: 0`;
         skillXPGained.style.fontSize = "12px";
+
+        const skillXPGainedLabel = document.createElement('div');
+        const skillXPGainedValue = document.createElement('div');
+        skillXPGainedValue.id = `skillXPGainedValue`;
+        skillXPGainedLabel.textContent = `XP Gained:`;
+        skillXPGainedLabel.style.color = "#ccc";
+        skillXPGained.appendChild(skillXPGainedLabel);
+        skillXPGained.appendChild(skillXPGainedValue);
+        
+        
         const skillXPLeft = document.createElement('div');
         skillXPLeft.id = `skillXPLeft`;
-        skillXPLeft.textContent = `XP Left: ${this.levelToXP[skill._level + 1] - skill._xp}`;
         skillXPLeft.style.fontSize = "12px";
+
+        const skillXPLeftLabel = document.createElement('div');
+        const skillXPLeftValue = document.createElement('div');
+        skillXPLeftValue.id = `skillXPLeftValue`;
+        skillXPLeftLabel.textContent = `XP Left:`;
+        skillXPLeftLabel.style.color = "#ccc";
+        skillXPLeft.appendChild(skillXPLeftLabel);
+        skillXPLeft.appendChild(skillXPLeftValue);
+
+        // Append to XP Details Left
         xpDetailsLeft.appendChild(skillXPGained);
         xpDetailsLeft.appendChild(skillXPLeft);
 
+
+
+        // Right Side of XP Details
         const xpDetailsRight = document.createElement('div');
         xpDetailsRight.style.display = "flex";
-        xpDetailsRight.style.flexDirection = "row";
-        xpDetailsRight.style.justifyContent = "space-around";
-
+        xpDetailsRight.style.flexDirection = "column";
 
         const skillXPPerHour = document.createElement('div');
         skillXPPerHour.id = `skillXPPerHour`;
-        skillXPPerHour.textContent = `XP/Hour: 0`;
         skillXPPerHour.style.fontSize = "12px";
+        const skillXPPerHourLabel = document.createElement('div');
+        const skillXPPerHourValue = document.createElement('div');
+        skillXPPerHourValue.id = `skillXPPerHourValue`;
+        skillXPPerHourLabel.textContent = `XP/Action:`;
+        skillXPPerHourLabel.style.color = "#ccc";
+        skillXPPerHour.appendChild(skillXPPerHourLabel);
+        skillXPPerHour.appendChild(skillXPPerHourValue);
+
         const skillActionsLeft = document.createElement('div');
         skillActionsLeft.id = `skillActionsLeft`;
-        skillActionsLeft.textContent = `Actions: 0`;
         skillActionsLeft.style.fontSize = "12px";
+        const skillActionsLeftLabel = document.createElement('div');
+        const skillActionsLeftValue = document.createElement('div');
+        skillActionsLeftValue.id = `skillActionsLeftValue`;
+        skillActionsLeftLabel.textContent = `Actions Left:`;
+        skillActionsLeftLabel.style.color = "#ccc";
+        skillActionsLeft.appendChild(skillActionsLeftLabel);
+        skillActionsLeft.appendChild(skillActionsLeftValue);
+
+        // Append to XP Details Right
         xpDetailsRight.appendChild(skillXPPerHour);
         xpDetailsRight.appendChild(skillActionsLeft);
-        
+
+
+        // Append to XP Details Container
         xpDetails.appendChild(xpDetailsLeft);
         xpDetails.appendChild(xpDetailsRight);
 
         // XP Bar
         const xpProgressBar = document.createElement('div');
         xpProgressBar.style.width = "100%";
-        xpProgressBar.style.height = "10px";
+        xpProgressBar.style.height = "15px";
         xpProgressBar.style.backgroundColor = "#80808069";
         xpProgressBar.style.borderRadius = "5px";
         xpProgressBar.style.marginTop = "5px";
         xpProgressBar.style.overflow = "hidden";
+        xpProgressBar.style.position = "relative";
         const xpProgress = document.createElement('div');
-        xpProgress.style.width = `${(skill._xp / this.levelToXP[skill._level + 1]) * 100}%`;
+        const currentLevelXP = this.levelToXP[skill._level];
+        const nextLevelXP = this.levelToXP[skill._level + 1];
+        const xpPercentage = (skill._xp - currentLevelXP) / (nextLevelXP - currentLevelXP);
+        xpProgress.style.width = `${xpPercentage * 100}%`;
         xpProgress.id = `xpProgress`;
         xpProgress.style.height = "100%";
         xpProgress.style.backgroundColor = "rgb(82 209 82)";
         xpProgress.style.transition = "width 0.5s ease-in-out";
+        xpProgress.style.position = "absolute";
         xpProgressBar.appendChild(xpProgress);
-        xpDetails.appendChild(xpProgressBar);
+
+        const xpProgressDetails = document.createElement('div');
+        xpProgressDetails.style.margin = "0 5px";
+        xpProgressDetails.style.fontSize = "12px";
+        xpProgressDetails.style.position = "absolute";
+        xpProgressDetails.style.width = "-webkit-fill-available";
+        xpProgressDetails.style.color = "black";
+
+        // Current Level Span
+        const currentLevelSpan = document.createElement('span');
+        currentLevelSpan.id = `currentLevelSpan`;
+        currentLevelSpan.textContent = `Lvl. ${skill._level}`;
+
+        // Next Level Span
+        const nextLevelSpan = document.createElement('span');
+        nextLevelSpan.id = `nextLevelSpan`;
+        nextLevelSpan.textContent = `Lvl. ${skill._level + 1}`;
+        nextLevelSpan.style.position = "absolute";
+        nextLevelSpan.style.right = "0";
+
+        // XP Progress Span
+        const xpProgressSpan = document.createElement('span');
+        xpProgressSpan.id = `xpProgressSpan`;
+        xpProgressSpan.textContent = `${xpPercentage.toFixed(1) * 100}%`;
+        xpProgressSpan.style.position = "absolute";
+        xpProgressSpan.style.left = "50%";
+        xpProgressSpan.style.transform = "translateX(-50%)";
+
+        xpProgressDetails.appendChild(currentLevelSpan);
+        xpProgressDetails.appendChild(xpProgressSpan);
+        xpProgressDetails.appendChild(nextLevelSpan);
+        xpProgressBar.appendChild(xpProgressDetails);
+        skillTracker.appendChild(xpProgressBar);
 
         this.skillTrackers[skillName] = {
             trackerElement: skillTracker,
@@ -323,31 +402,52 @@ export class ExperienceTracker extends Plugin {
       skillTracker.previousXP = skill._xp;
 
       // Update new values in the tracker
-      const skillXPGained = skillTracker.trackerElement.querySelector('#skillXPGained');
-      const skillXPLeft = skillTracker.trackerElement.querySelector('#skillXPLeft');
-      const skillXPPerHour = skillTracker.trackerElement.querySelector('#skillXPPerHour');
-      const skillActionsLeft = skillTracker.trackerElement.querySelector('#skillActionsLeft');
+      const skillXPGained = skillTracker.trackerElement.querySelector('#skillXPGainedValue');
+      const skillXPLeft = skillTracker.trackerElement.querySelector('#skillXPLeftValue');
+      const skillXPPerHour = skillTracker.trackerElement.querySelector('#skillXPPerHourValue');
+      const skillActionsLeft = skillTracker.trackerElement.querySelector('#skillActionsLeftValue');
       const xpProgress = skillTracker.trackerElement.querySelector('#xpProgress');
 
       if (skillXPGained) {
-          skillXPGained.textContent = `XP Gained: ${skillTracker.trackedXPGained}`;
+          skillXPGained.textContent = `${abbreviateValue(skillTracker.trackedXPGained)}`;
       }
 
       if (skillXPLeft) {
-          skillXPLeft.textContent = `XP Left: ${this.levelToXP[skill._level + 1] - skill._xp}`;
+          skillXPLeft.textContent = `${abbreviateValue(this.levelToXP[skill._level + 1] - skill._xp)}`;
       }
 
       if (skillXPPerHour) {
-          const xpPerHour = 'TODO';
-          skillXPPerHour.textContent = `XP/Action : ${Math.floor(skillTracker.trackedXPGained / skillTracker.trackedActions)}`;
+          skillXPPerHour.textContent = `${abbreviateValue(Math.floor(skillTracker.trackedXPGained / skillTracker.trackedActions))}`;
       }
 
       if (skillActionsLeft) {
-          skillActionsLeft.textContent = `Actions: ${Math.ceil((this.levelToXP[skill._level + 1] - skill._xp) / (skillTracker.trackedXPGained / skillTracker.trackedActions))}`;
+          skillActionsLeft.textContent = `${abbreviateValue(Math.ceil((this.levelToXP[skill._level + 1] - skill._xp) / (skillTracker.trackedXPGained / skillTracker.trackedActions)))}`;
       }
 
       if (xpProgress) {
-          xpProgress.style.width = `${(skill._xp / this.levelToXP[skill._level + 1]) * 100}%`;
+          const currentLevelXP = this.levelToXP[skill._level];
+          const nextLevelXP = this.levelToXP[skill._level + 1];
+          const xpPercentage = (skill._xp - currentLevelXP) / (nextLevelXP - currentLevelXP);
+
+          xpProgress.style.width = `${xpPercentage * 100}%`;
+
+          // Update the current and next level spans
+          const currentLevelSpan = skillTracker.trackerElement.querySelector('#currentLevelSpan');
+          const nextLevelSpan = skillTracker.trackerElement.querySelector('#nextLevelSpan');
+          if (currentLevelSpan) {
+              currentLevelSpan.textContent = `Lvl. ${skill._level}`;
+          }
+          if (nextLevelSpan) {
+              nextLevelSpan.textContent = `Lvl. ${skill._level + 1}`;
+          }
+
+          // Update the XP progress span
+          const xpProgressSpan = skillTracker.trackerElement.querySelector('#xpProgressSpan');
+          if (xpProgressSpan) {
+              const xpPercentage = (skill._xp - this.levelToXP[skill._level]) / (this.levelToXP[skill._level + 1] - this.levelToXP[skill._level]);
+              xpProgressSpan.textContent = `${(xpPercentage * 100).toFixed(1)}%`;
+          }
+
       }
 
 
