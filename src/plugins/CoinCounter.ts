@@ -1,5 +1,6 @@
 import { Plugin } from "../core/interfaces/highlite/plugin/plugin.class";
 import { UIManager, UIManagerScope } from "../core/managers/highlite/uiManager";
+import { abbreviateValue } from "../core/utilities/abbreviateValue";
 
 export class CoinCounter extends Plugin {
     pluginName: string = "Coin Counter";
@@ -152,7 +153,7 @@ export class CoinCounter extends Plugin {
 
         this.coinCount = this.bankedCoins + this.inventoryCoins;
         if (this.coinCounterValueUI) {
-            this.coinCounterValueUI.innerText = `${this.coinCount}`;
+            this.coinCounterValueUI.innerText = `${abbreviateValue(this.coinCount)}`;
         } else {
             this.log("Coin Counter UI Element not found.");
         }
