@@ -40,26 +40,25 @@ export class Highlite {
 
 
         // Class Mappings
-        this.hookManager.registerClass("Ck", "EntityManager");
-        this.hookManager.registerClass("hN", "GroundItemManager");
-        this.hookManager.registerClass("oF", "MeshManager");
-        this.hookManager.registerClass("_F", "WorldMapManager");
-        this.hookManager.registerClass("GR", "AtmosphereManager");
-        this.hookManager.registerClass("sD", "WorldEntityManager");
-        this.hookManager.registerClass("Iz", "SpellManager")
-        this.hookManager.registerClass("Dk", "SpellMeshManager");
-        this.hookManager.registerClass("wk", "GameLoop");
-        this.hookManager.registerClass("$V", "ChatManager");
-        this.hookManager.registerClass("Pz", "RangeManager");
-        this.hookManager.registerClass("zz", "SocketManager");
-        this.hookManager.registerClass("qz", "ItemManager");
-        this.hookManager.registerClass("$z", "GameEngine");
-        this.hookManager.registerClass("LF", "MainPlayer");
+        this.hookManager.registerClass("Tk", "EntityManager");
+        this.hookManager.registerClass("cN", "GroundItemManager");
+        this.hookManager.registerClass("lF", "MeshManager");
+        this.hookManager.registerClass("mF", "WorldMapManager");
+        this.hookManager.registerClass("zR", "AtmosphereManager");
+        this.hookManager.registerClass("aD", "WorldEntityManager");
+        this.hookManager.registerClass("Mz", "SpellManager")
+        this.hookManager.registerClass("wk", "SpellMeshManager");
+        this.hookManager.registerClass("Bk", "GameLoop");
+        this.hookManager.registerClass("ZV", "ChatManager");
+        this.hookManager.registerClass("Dz", "RangeManager");
+        this.hookManager.registerClass("qz", "SocketManager");
+        this.hookManager.registerClass("Kz", "ItemManager");
+        this.hookManager.registerClass("Jz", "GameEngine");
+        // this.hookManager.registerClass("LF", "MainPlayer");
         this.hookManager.registerClass("tR", "GameCameraManager");
-        this.hookManager.registerClass("RX", "HealthBar")
-        this.hookManager.registerClass("AF", "AF"); // Unkown Name
-        this.hookManager.registerClass("aG", "aG") // Unkown Name
-        this.hookManager.registerClass("DW", "PrivateChatMessageList");
+        // this.hookManager.registerClass("RX", "HealthBar")
+        this.hookManager.registerClass("PF", "PF"); // Unkown Name
+        this.hookManager.registerClass("NW", "PrivateChatMessageList");
 
         // Function Hook-ins
         this.hookManager.registerClassHook("GameLoop", "_update");
@@ -70,20 +69,15 @@ export class Highlite {
         this.hookManager.registerClassHook("SocketManager", "_handleEnteredIdleStateAction");
         this.hookManager.registerClassHook("SocketManager", "_handleTradeRequestedPacket");
         this.hookManager.registerClassHook("EntityManager", "addOtherPlayer");
-        this.hookManager.registerClassHook("HealthBar", "_updateCurrentHealthbarColor");
         this.hookManager.registerClassHook("ItemManager", "invokeInventoryAction");
 
         // Needs Naming
-        this.hookManager.registerStaticClassHook('dG', 'handleTargetAction');
-        this.hookManager.registerStaticClassHook('dG', 'getActionsAndEntitiesAtMousePointer');
-        this.hookManager.registerClassHook("AF", "addItemToInventory");
-        this.contextMenuManager.registerContextHook("vG", "_createInventoryItemContextMenuItems", this.contextMenuManager.inventoryContextHook);
-        this.contextMenuManager.registerContextHook("vG", "_createGameWorldContextMenuItems", this.contextMenuManager.gameWorldContextHook);
-        this.hookManager.registerStaticClassHook('dG', 'getActionsAndEntitiesAtMousePointer', this.contextMenuManager.ActionSorting);
-
-
-
-        
+        this.hookManager.registerClassHook("PF", "addItemToInventory");
+        this.contextMenuManager.registerContextHook("CG", "_createInventoryItemContextMenuItems", this.contextMenuManager.inventoryContextHook);
+        this.contextMenuManager.registerContextHook("CG", "_createGameWorldContextMenuItems", this.contextMenuManager.gameWorldContextHook);
+        this.hookManager.registerStaticClassHook('pG', 'handleTargetAction');
+        this.hookManager.registerStaticClassHook('pG', 'getActionsAndEntitiesAtMousePointer');
+        this.hookManager.registerStaticClassHook('pG', 'getActionsAndEntitiesAtMousePointer', this.contextMenuManager.ActionSorting);
 
         // Lookup Table Mappings
         document.highlite.gameLookups["GameWorldActions"] = document.client.get("VA");

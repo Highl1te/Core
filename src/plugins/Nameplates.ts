@@ -87,7 +87,7 @@ export class Nameplates extends Plugin {
         const Players = this.gameHooks.EntityManager.Instance._players; // Array
         const MainPlayer = this.gameHooks.EntityManager.Instance.MainPlayer;
         const playerCombatLevel = MainPlayer._combatLevel;
-        const _W = document.client.get("_W");
+        const SW = document.client.get("SW");
 
 
         // Clear non-existing NPCs
@@ -153,7 +153,7 @@ export class Nameplates extends Plugin {
                         const lvlSpan = document.createElement("div");
                         lvlSpan.style.textAlign = "center";
                         lvlSpan.innerText = `Lvl. ${npc._combatLevel}`
-                        lvlSpan.className = _W.getTextColorClassNameForCombatLevelDifference(playerCombatLevel, npc._combatLevel)
+                        lvlSpan.className = SW.getTextColorClassNameForCombatLevelDifference(playerCombatLevel, npc._combatLevel)
                         
                         if (npc._def._combat._isAggressive && !npc._def._combat._isAlwaysAggro) {
                             lvlSpan.innerText += " 😠"
