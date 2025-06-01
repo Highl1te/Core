@@ -135,7 +135,13 @@ export class ExperienceTracker extends Plugin {
             trackerElement: HTMLElement,
             trackedActions: number,
             trackedXPGained: number,
+            trackerXPGainedWindow: Array<{
+                xpGained: number,
+                timestamp: number,
+            }>,
+            trackerXPTimer: number,
             previousXP: number,
+            inXPPerHourMode?: boolean,
         }
     } = {};
 
@@ -270,6 +276,7 @@ export class ExperienceTracker extends Plugin {
         skillActionsLeft.style.fontSize = "12px";
         const skillActionsLeftLabel = document.createElement('div');
         const skillActionsLeftValue = document.createElement('div');
+        skillActionsLeftLabel.id = `skillActionsLeftLabel`;
         skillActionsLeftValue.id = `skillActionsLeftValue`;
         skillActionsLeftLabel.textContent = `Actions Left:`;
         skillActionsLeftLabel.style.color = "#ccc";
@@ -343,17 +350,29 @@ export class ExperienceTracker extends Plugin {
             trackerElement: skillTracker,
             trackedActions: 0,
             trackedXPGained: 0,
-            previousXP: skill._xp
+            previousXP: skill._xp,
+            trackerXPGainedWindow: [],
+            trackerXPTimer: 0,
+            inXPPerHourMode: false
         };
 
         // When the user hovers over the skill tracker, show a button in the middle of the tracker to hide it
         skillTracker.addEventListener('mouseenter', () => {
+            // Actions Div
+            const actionsDiv = document.createElement('div');
+            actionsDiv.id = "skillTrackerActions";
+            actionsDiv.style.position = 'absolute';
+            actionsDiv.style.left = '50%';
+            actionsDiv.style.transform = 'translate(-25%, 10%)';
+            actionsDiv.style.display = 'flex';
+            actionsDiv.style.flexDirection = 'column';
+            skillTracker.appendChild(actionsDiv);
+
+
+            // Hide Button
             const hideButton = document.createElement('div');
             hideButton.textContent = "Hide";
             hideButton.id = "hideSkillTrackerButton";
-            hideButton.style.position = 'absolute';
-            hideButton.style.left = '50%';
-            hideButton.style.transform = 'translate(-50%, 50%)';
             hideButton.style.backgroundColor = 'rgb(65 65 65)';
             hideButton.style.padding = '5px 10px';
             hideButton.style.borderRadius = '5px';
@@ -361,14 +380,81 @@ export class ExperienceTracker extends Plugin {
             hideButton.addEventListener('click', () => {
                 skillTracker.style.display = "none"; // Hide the tracker
             });
-            skillTracker.appendChild(hideButton);
+            actionsDiv.appendChild(hideButton);
+
+            // Switch to XP per Hour Button
+            const xpPerHourButton = document.createElement('div');
+            // Set text content based on the current mode
+            xpPerHourButton.textContent = "XP/Hour"; // Default text
+            if (this.skillTrackers[skillName].inXPPerHourMode) {
+                xpPerHourButton.textContent = "Actions Left"; // If already in XP per hour mode, show Actions Left
+            }
+            xpPerHourButton.id = "xpPerHourButton";
+            xpPerHourButton.style.backgroundColor = 'rgb(65 65 65)';
+            xpPerHourButton.style.padding = '5px 10px';
+            xpPerHourButton.style.borderRadius = '5px';
+            xpPerHourButton.style.marginTop = '5px';
+            xpPerHourButton.style.cursor = 'pointer';
+            xpPerHourButton.addEventListener('click', () => {
+                const skillTracker = this.skillTrackers[skillName];
+                if (skillTracker && !skillTracker.inXPPerHourMode) {
+                    skillTracker.inXPPerHourMode = true;
+                    xpPerHourButton.textContent = "Actions Left"; // Change button text to Actions Left
+                    // Update skillActionsLeftLabel to say "XP/Hour"
+                    const skillActionsLeftLabel = skillTracker.trackerElement.querySelector('#skillActionsLeftLabel');
+                    if (skillActionsLeftLabel) {
+                        skillActionsLeftLabel.textContent = "XP/Hour:";
+                    }
+
+                    // Update skillActionsLeftValue to show the XP per hour
+                    const skillActionsLeftValue = skillTracker.trackerElement.querySelector('#skillActionsLeftValue');
+                    if (skillActionsLeftValue) {
+                        // Calculate the total XP gained in the last 5 minutes
+                        const totalXPGained = skillTracker.trackerXPGainedWindow.reduce((total, entry) => {
+                            return total + entry.xpGained;
+                        }, 0);
+
+                        // Interpolate the XP gained per hour from the last 5 minutes
+                        const XPPerHour = totalXPGained * (60 / 5); // Total XP gained in the last 5 minutes, multiplied by 12 to get per hour
+
+                        skillActionsLeftValue.textContent = `${abbreviateValue(XPPerHour)}`;
+                    }
+                } else if (skillTracker && skillTracker.inXPPerHourMode) {
+                    skillTracker.inXPPerHourMode = false;
+                    xpPerHourButton.textContent = "XP/Hour"; // Change button text back to XP/Hour
+                    // Update skillActionsLeftLabel to say "Actions Left"
+                    const skillActionsLeftLabel = skillTracker.trackerElement.querySelector('#skillActionsLeftLabel');
+                    if (skillActionsLeftLabel) {
+                        skillActionsLeftLabel.textContent = "Actions Left:";
+                    }
+                    // Update skillActionsLeftValue to show the actions left
+                    const skillActionsLeftValue = skillTracker.trackerElement.querySelector('#skillActionsLeftValue');
+                    if (skillActionsLeftValue) {
+                        skillActionsLeftValue.textContent = `${abbreviateValue(Math.ceil((this.levelToXP[skill._level + 1] - skill._xp) / (skillTracker.trackedXPGained / skillTracker.trackedActions)))}`;
+                    }
+
+                }
+            });
+
+            actionsDiv.appendChild(xpPerHourButton);
         });
 
         skillTracker.addEventListener('mouseleave', () => {
+            const actionsDiv = skillTracker.querySelector('#skillTrackerActions');
+            if (!actionsDiv) {
+                return; // No actions div to remove
+            }
             const hideButton = skillTracker.querySelector('#hideSkillTrackerButton');
             if (hideButton) {
-                skillTracker.removeChild(hideButton);
+                actionsDiv.removeChild(hideButton);
             }
+
+            const xpPerHourButton = skillTracker.querySelector('#xpPerHourButton');
+            if (xpPerHourButton) {
+                actionsDiv.removeChild(xpPerHourButton);
+            }
+            
+            skillTracker.removeChild(actionsDiv);
         });
 
 
@@ -395,8 +481,20 @@ export class ExperienceTracker extends Plugin {
 
       skillTracker.trackerElement.style.display = "flex"; // Show the tracker if it was hidden
 
-
       const xpGained = skill._xp - skillTracker.previousXP; // Also XP per Action
+
+      // Add the new XP gained to the tracker
+      skillTracker.trackerXPGainedWindow.push({
+          xpGained: xpGained,
+          timestamp: Date.now()
+      });
+
+      // Remove old entries from the tracker (older than 5 minutes)
+      const currentTime = Date.now();
+      skillTracker.trackerXPGainedWindow = skillTracker.trackerXPGainedWindow.filter(entry => {
+          return (currentTime - entry.timestamp) <= (5 * 60 * 1000); // 5 minutes in milliseconds
+      });
+
       skillTracker.trackedXPGained += xpGained;
       skillTracker.trackedActions += 1;
       skillTracker.previousXP = skill._xp;
@@ -420,8 +518,20 @@ export class ExperienceTracker extends Plugin {
           skillXPPerHour.textContent = `${abbreviateValue(Math.floor(skillTracker.trackedXPGained / skillTracker.trackedActions))}`;
       }
 
-      if (skillActionsLeft) {
+      if (skillActionsLeft && !skillTracker.inXPPerHourMode) {
           skillActionsLeft.textContent = `${abbreviateValue(Math.ceil((this.levelToXP[skill._level + 1] - skill._xp) / (skillTracker.trackedXPGained / skillTracker.trackedActions)))}`;
+      }
+
+      if (skillActionsLeft && skillTracker.inXPPerHourMode) {
+          // Calculate the total XP gained in the last 5 minutes
+          const totalXPGained = skillTracker.trackerXPGainedWindow.reduce((total, entry) => {
+              return total + entry.xpGained;
+          }, 0);
+
+          // Interpolate the XP gained per hour from the last 5 minutes
+          const XPPerHour = totalXPGained * (60 / 5); // Total XP gained in the last 5 minutes, multiplied by 12 to get per hour
+
+          skillActionsLeft.textContent = `${abbreviateValue(XPPerHour)}`;
       }
 
       if (xpProgress) {

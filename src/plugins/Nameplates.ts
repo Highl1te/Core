@@ -31,10 +31,10 @@ export class Nameplates extends Plugin {
 
     NampeplateContainer : HTMLDivElement | null = null;
     NPCDomElements : {
-        [key : string] : HTMLDivElement
+        [key : string] : { element: HTMLDivElement, position : Vector3 }
     } = {}
     PlayerDomElements : {
-        [key : string] : HTMLDivElement
+        [key : string] : { element: HTMLDivElement, position : Vector3  }
     } = {}
 
 
@@ -69,12 +69,14 @@ export class Nameplates extends Plugin {
         // Clear the NPC and Player DOM elements
         for (const key in this.NPCDomElements) {
             if (this.NPCDomElements[key]) {
-                this.NPCDomElements[key].remove();
+                this.NPCDomElements[key].element.remove();
+                delete this.NPCDomElements[key];
             }
         }
         for (const key in this.PlayerDomElements) {
             if (this.PlayerDomElements[key]) {
-                this.PlayerDomElements[key].remove();
+                this.PlayerDomElements[key].element.remove();
+                delete this.PlayerDomElements[key];
             }
         }
 
@@ -93,13 +95,13 @@ export class Nameplates extends Plugin {
         // Clear non-existing NPCs
         if (NPCS.size == 0 || this.settings.enable.value == false || this.settings.npcNameplates!.value == false) {
             for (const key in this.NPCDomElements) {
-                this.NPCDomElements[key]!.remove();
+                this.NPCDomElements[key]?.element.remove();
                 delete this.NPCDomElements[key];
             }
         }
         for (const key in this.NPCDomElements) {
             if (!NPCS[key]) {
-                this.NPCDomElements[key]!.remove();
+                this.NPCDomElements[key]?.element.remove();
                 delete this.NPCDomElements[key];
             }
         }
@@ -108,14 +110,14 @@ export class Nameplates extends Plugin {
         // Clear non-existing Players
         if (Players.length == 0 || this.settings.enable.value == false || this.settings.playerNameplates!.value == false) {
             for (const key in this.PlayerDomElements) {
-                this.PlayerDomElements[key]!.remove();
+                this.PlayerDomElements[key]?.element.remove();
                 delete this.PlayerDomElements[key];
             }
         }
 
         for (const key in this.PlayerDomElements) {
             if (!Players[key] && key != MainPlayer._entityId || (key == MainPlayer._entityId && !this.settings.youNameplate!.value)) {
-                this.PlayerDomElements[key]!.remove();
+                this.PlayerDomElements[key]?.element.remove();
                 delete this.PlayerDomElements[key];
             }
         }
@@ -129,16 +131,17 @@ export class Nameplates extends Plugin {
             for (const [key,value] of NPCS) {
                 const npc = value;
                 if (!this.NPCDomElements[key]) {
-                    this.NPCDomElements[key] = document.createElement('div');
-                    this.NPCDomElements[key].id = `highlite-nameplates-${key}`;
-                    this.NPCDomElements[key].style.position = "absolute";
-                    this.NPCDomElements[key].style.pointerEvents = "none";
-                    this.NPCDomElements[key].style.zIndex = "1000";
-                    this.NPCDomElements[key].style.display = "flex";
-                    this.NPCDomElements[key].style.flexDirection = "column";
-                    // Center children
-                    this.NPCDomElements[key].style.justifyContent = "center";
-                    // this.NPCDomElements[key].innerHTML = npc._name;
+                    this.NPCDomElements[key] = {
+                        element: document.createElement('div'),
+                        position: Vector3.ZeroReadOnly
+                    };
+                    this.NPCDomElements[key]!.element.id = `highlite-nameplates-${key}`;
+                    this.NPCDomElements[key]!.element.style.position = "absolute";
+                    this.NPCDomElements[key]!.element.style.pointerEvents = "none";
+                    this.NPCDomElements[key]!.element.style.zIndex = "1000";
+                    this.NPCDomElements[key]!.element.style.display = "flex";
+                    this.NPCDomElements[key]!.element.style.flexDirection = "column";
+                    this.NPCDomElements[key]!.element.style.justifyContent = "center";
                     
                     // Create Name Holder
                     const nameSpan = document.createElement("div");
@@ -146,7 +149,7 @@ export class Nameplates extends Plugin {
                     nameSpan.style.textAlign = "center";
 
                     nameSpan.innerText = npc._name;
-                    this.NPCDomElements[key].append(nameSpan);
+                    this.NPCDomElements[key]!.element.append(nameSpan);
 
                     // Create Lvl Holder
                     if (npc._combatLevel != 0) {
@@ -166,11 +169,13 @@ export class Nameplates extends Plugin {
                         if (npc._def._combat._isAlwaysAggro) {
                             lvlSpan.innerText += " 👿";
                         }
-                        this.NPCDomElements[key].append(lvlSpan);
+                        this.NPCDomElements[key]!.element.append(lvlSpan);
                     }
 
-                    document.getElementById('highlite-nameplates')?.appendChild(this.NPCDomElements[key]);
+                    document.getElementById('highlite-nameplates')?.appendChild(this.NPCDomElements[key]!.element);
                 }
+
+                this.NPCDomElements[key]!.position = npc._currentGamePosition;
 
                 const npcMesh = npc._appearance._haloNode;
                 try {
@@ -184,24 +189,27 @@ export class Nameplates extends Plugin {
         if (this.settings.playerNameplates!.value) {
             for (const player of Players) {
                 if (!this.PlayerDomElements[player._entityId]) {
-                    this.PlayerDomElements[player._entityId] = document.createElement('div');
-                    this.PlayerDomElements[player._entityId]!.id = `highlite-nameplates-${player._entityId}`;
-                    this.PlayerDomElements[player._entityId]!.style.position = "absolute";
-                    this.PlayerDomElements[player._entityId]!.style.pointerEvents = "none";
-                    this.PlayerDomElements[player._entityId]!.style.zIndex = "1000";
-                    this.PlayerDomElements[player._entityId]!.style.color = "white";
-                    this.PlayerDomElements[player._entityId]!.innerHTML = player._name;
-                    document.getElementById('highlite-nameplates')?.appendChild(this.PlayerDomElements[player._entityId]!);
+                    this.PlayerDomElements[player._entityId] = {
+                        element: document.createElement('div'),
+                        position: Vector3.ZeroReadOnly
+                    };
+                    this.PlayerDomElements[player._entityId]!.element.id = `highlite-nameplates-${player._entityId}`;
+                    this.PlayerDomElements[player._entityId]!.element.style.position = "absolute";
+                    this.PlayerDomElements[player._entityId]!.element.style.pointerEvents = "none";
+                    this.PlayerDomElements[player._entityId]!.element.style.zIndex = "1000";
+                    this.PlayerDomElements[player._entityId]!.element.style.color = "white";
+                    this.PlayerDomElements[player._entityId]!.element.innerHTML = player._name;
+                    document.getElementById('highlite-nameplates')?.appendChild(this.PlayerDomElements[player._entityId]!.element);
                 }
 
                 // Check if Player is a friend
                 const playerFriends = this.gameHooks.ChatManager.Instance._friends;
                 for (const friend of playerFriends) {
                     if (friend == player._nameLowerCase) {
-                        this.PlayerDomElements[player._entityId]!.style.color = "lightgreen";
+                        this.PlayerDomElements[player._entityId]!.element.style.color = "lightgreen";
                         break;
                     } else {
-                        this.PlayerDomElements[player._entityId]!.style.color = "white";
+                        this.PlayerDomElements[player._entityId]!.element.style.color = "white";
                     }
                 }
 
@@ -216,14 +224,17 @@ export class Nameplates extends Plugin {
 
         if (this.settings.youNameplate!.value) {
             if (!this.PlayerDomElements[MainPlayer._entityId]) {
-                this.PlayerDomElements[MainPlayer._entityId] = document.createElement('div');
-                this.PlayerDomElements[MainPlayer._entityId]!.id = `highlite-nameplates-${MainPlayer._entityId}`;
-                this.PlayerDomElements[MainPlayer._entityId]!.style.position = "absolute";
-                this.PlayerDomElements[MainPlayer._entityId]!.style.pointerEvents = "none";
-                this.PlayerDomElements[MainPlayer._entityId]!.style.zIndex = "1000";
-                this.PlayerDomElements[MainPlayer._entityId]!.style.color = "cyan";
-                this.PlayerDomElements[MainPlayer._entityId]!.innerHTML = MainPlayer._name;
-                document.getElementById('highlite-nameplates')?.appendChild(this.PlayerDomElements[MainPlayer._entityId]!);
+                this.PlayerDomElements[MainPlayer._entityId] = {
+                    element: document.createElement('div'),
+                    position: Vector3.ZeroReadOnly
+                };
+                this.PlayerDomElements[MainPlayer._entityId]!.element.id = `highlite-nameplates-${MainPlayer._entityId}`;
+                this.PlayerDomElements[MainPlayer._entityId]!.element.style.position = "absolute";
+                this.PlayerDomElements[MainPlayer._entityId]!.element.style.pointerEvents = "none";
+                this.PlayerDomElements[MainPlayer._entityId]!.element.style.zIndex = "1000";
+                this.PlayerDomElements[MainPlayer._entityId]!.element.style.color = "cyan";
+                this.PlayerDomElements[MainPlayer._entityId]!.element.innerHTML = MainPlayer._name;
+                document.getElementById('highlite-nameplates')?.appendChild(this.PlayerDomElements[MainPlayer._entityId]!.element);
             }
 
             const playerMesh = MainPlayer._appearance._haloNode;
@@ -246,12 +257,28 @@ export class Nameplates extends Plugin {
         // camera._scene._frustrumPlanes
         const isInFrustrum = camera.isInFrustum(e);
         if (!isInFrustrum) {
-            t.style.visibility = "hidden";
+            t.element.style.visibility = "hidden";
         } else {
-            t.style.visibility = "visible";
+            t.element.style.visibility = "visible";
         }
 
-        t.style.transform = "translate3d(calc(" + this.pxToRem(translationCoordinates.x) + "rem - 50%), calc(" + this.pxToRem(translationCoordinates.y - 30) + "rem - 50%), 0px)"
+        // T is contains the position and is a member of either player or npc, if anything shares the same position, they should gain height based off where they fall in alphabetical order
+        
+        // Calculate the height based on the position in the array
+        // Find all elements that share the same position
+        // const elementsAtPosition = Object.values(this.NPCDomElements).concat(Object.values(this.PlayerDomElements)).filter(el => el.position.equals(t.position));
+        // const index = elementsAtPosition.findIndex(el => el.element.id === t.element.id);
+        // let heightOffset = index * 20; // 20px per element at the same position
+
+        // // If element is the only one at the position, set heightOffset to 0
+        // if (elementsAtPosition.length == 1) {
+        //     heightOffset = 0;
+        // }
+
+        const heightOffset = 0; // TODO: Implement height offset based on position in array
+
+
+        t.element.style.transform = "translate3d(calc(" + this.pxToRem(translationCoordinates.x) + "rem - 50%), calc(" + this.pxToRem(translationCoordinates.y - 30 - heightOffset) + "rem - 50%), 0px)"
 
 
     }
