@@ -580,9 +580,6 @@ export class SettingsManager {
                     toggleLabel.style.whiteSpace = 'nowrap';
                     toggleLabel.style.overflow = 'hidden';
                     toggleLabel.style.textOverflow = 'ellipsis';
-                    contentRow.title = setting.description
-                        ? setting.description
-                        : finalizedSettingName;
 
                     toggleLabel.addEventListener('click', () => {
                         toggleSwitch.click();
@@ -689,9 +686,6 @@ export class SettingsManager {
                     numberLabel.style.whiteSpace = 'nowrap';
                     numberLabel.style.overflow = 'hidden';
                     numberLabel.style.textOverflow = 'ellipsis';
-                    contentRow.title = setting.description
-                        ? setting.description
-                        : finalizedSettingName;
 
                     rangeContainer.appendChild(numberLabel);
                     rangeContainer.appendChild(numberInput);
@@ -780,9 +774,6 @@ export class SettingsManager {
                     colorLabel.style.whiteSpace = 'nowrap';
                     colorLabel.style.overflow = 'hidden';
                     colorLabel.style.textOverflow = 'ellipsis';
-                    contentRow.title = setting.description
-                        ? setting.description
-                        : finalizedSettingName;
 
                     colorContainer.appendChild(colorLabel);
                     colorContainer.appendChild(colorInput);
@@ -868,9 +859,6 @@ export class SettingsManager {
                     textLabel.style.whiteSpace = 'nowrap';
                     textLabel.style.overflow = 'hidden';
                     textLabel.style.textOverflow = 'ellipsis';
-                    contentRow.title = setting.description
-                        ? setting.description
-                        : finalizedSettingName;
 
                     textContainer.appendChild(textLabel);
                     textContainer.appendChild(textInput);
@@ -933,9 +921,6 @@ export class SettingsManager {
                             '0 2px 4px var(--theme-accent-transparent-30)';
                         buttonInput.style.transform = 'translateY(0)';
                     });
-                    contentRow.title = setting.description
-                        ? setting.description
-                        : finalizedSettingName;
 
                     buttonContainer.appendChild(buttonInput);
                     contentRow.appendChild(buttonContainer);
@@ -1031,9 +1016,6 @@ export class SettingsManager {
                     comboLabel.style.overflow = 'hidden';
                     comboLabel.style.textOverflow = 'ellipsis';
 
-                    contentRow.title = setting.description
-                        ? setting.description
-                        : finalizedSettingName;
 
                     comboContainer.appendChild(comboLabel);
                     comboContainer.appendChild(comboSelect);
@@ -1046,6 +1028,10 @@ export class SettingsManager {
                         `[Highlite] Unsupported setting type: ${setting.type} for ${settingKey}`
                     );
             }
+    
+            contentRow.title = setting.description
+                ? setting.description
+                : finalizedSettingName;
 
             // Handle initially disabled state
             if (setting.disabled) {
