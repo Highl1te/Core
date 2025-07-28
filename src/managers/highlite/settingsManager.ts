@@ -932,26 +932,53 @@ export class SettingsManager {
                     comboContainer.style.flexDirection = 'column';
                     comboContainer.style.gap = '8px';
 
-                    if (!setting.dataset || !Array.isArray(setting.dataset)) 
-                        return;
+
+                    const comboLabel = document.createElement('label');
+                    comboLabel.innerText = finalizedSettingName;
+                    comboLabel.style.color = 'var(--theme-text-primary)';
+                    comboLabel.style.fontSize = '16px';
+                    comboLabel.style.margin = '0px';
+                    comboLabel.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    comboLabel.style.fontWeight = '500';
+                    comboLabel.style.letterSpacing = '0.025em';
+                    comboLabel.style.whiteSpace = 'nowrap';
+                    comboLabel.style.overflow = 'hidden';
+                    comboLabel.style.textOverflow = 'ellipsis';
+
+                    if (!setting.dataset || !Array.isArray(setting.dataset) || setting.dataset.length < 1) {
+                        comboLabel.innerText = "Add a dataset array";
+                        contentRow.appendChild(comboLabel);
+                        break;
+                    }
 
                     const comboSelect = document.createElement('select');
 
+                    comboSelect.addEventListener('change', async () => {
+                        const newValue = comboSelect.value;
+                        setting.value = newValue;
+                        setting.callback.call(plugin);
+                        await this.storePluginSettings(this.username, plugin);
+                        this.refreshPluginSettingsVisibility(plugin);
+                    });
+
                     // Build combobox list from dataset
                     for (let i = 0; i < setting.dataset.length; i++) {
-                        const option = setting.dataset[i];
+                        const option = String(setting.dataset[i]);
                         const opt = document.createElement('option');
                         opt.value = option;
                         opt.textContent = option;
                         comboSelect.appendChild(opt);
                     }
 
-                    // Default to first if none set
                     if (
                         typeof setting.value !== 'string' ||
-                        setting.value == ''
-                    )
+                        !setting.dataset.includes(setting.value)
+                    ) {
                         setting.value = setting.dataset[0];
+                        comboSelect.selectedIndex = 0;
+                        comboSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
 
                     comboSelect.value = setting.value as string;
 
@@ -983,39 +1010,6 @@ export class SettingsManager {
                     comboSelect.style.cursor = 'pointer';
                     comboSelect.style.width = '100%';
                     comboSelect.style.height = '36px';
-
-                    comboSelect.addEventListener('change', async () => {
-                        const newValue = comboSelect.value;
-
-                        if (
-                            setting.validation &&
-                            !setting.validation(newValue)
-                        ) {
-                            comboSelect.style.border = '1px solid #ff4444';
-                            comboSelect.style.boxShadow =
-                                '0 0 0 2px rgba(255, 68, 68, 0.2)';
-                            return;
-                        }
-
-                        setting.value = newValue;
-                        setting.callback.call(plugin);
-                        await this.storePluginSettings(this.username, plugin);
-                        this.refreshPluginSettingsVisibility(plugin);
-                    });
-
-                    const comboLabel = document.createElement('label');
-                    comboLabel.innerText = finalizedSettingName;
-                    comboLabel.style.color = 'var(--theme-text-primary)';
-                    comboLabel.style.fontSize = '16px';
-                    comboLabel.style.margin = '0px';
-                    comboLabel.style.fontFamily =
-                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-                    comboLabel.style.fontWeight = '500';
-                    comboLabel.style.letterSpacing = '0.025em';
-                    comboLabel.style.whiteSpace = 'nowrap';
-                    comboLabel.style.overflow = 'hidden';
-                    comboLabel.style.textOverflow = 'ellipsis';
-
 
                     comboContainer.appendChild(comboLabel);
                     comboContainer.appendChild(comboSelect);
