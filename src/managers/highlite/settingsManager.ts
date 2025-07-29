@@ -946,7 +946,7 @@ export class SettingsManager {
                     comboLabel.style.overflow = 'hidden';
                     comboLabel.style.textOverflow = 'ellipsis';
 
-                    if (!setting.dataset || !Array.isArray(setting.dataset) || setting.dataset.length < 1) {
+                    if (!setting.options || !Array.isArray(setting.options) || setting.options.length < 1) {
                         comboLabel.innerText = "Add a dataset array";
                         contentRow.appendChild(comboLabel);
                         break;
@@ -963,8 +963,8 @@ export class SettingsManager {
                     });
 
                     // Build combobox list from dataset
-                    for (let i = 0; i < setting.dataset.length; i++) {
-                        const option = String(setting.dataset[i]);
+                    for (let i = 0; i < setting.options.length; i++) {
+                        const option = String(setting.options[i]);
                         const opt = document.createElement('option');
                         opt.value = option;
                         opt.textContent = option;
@@ -973,9 +973,9 @@ export class SettingsManager {
 
                     if (
                         typeof setting.value !== 'string' ||
-                        !setting.dataset.includes(setting.value)
+                        !setting.options.includes(setting.value)
                     ) {
-                        setting.value = setting.dataset[0];
+                        setting.value = setting.options[0];
                         comboSelect.selectedIndex = 0;
                         comboSelect.dispatchEvent(new Event('change', { bubbles: true }));
                     }
@@ -1018,9 +1018,8 @@ export class SettingsManager {
                     break;
 
                 default:
-                    throw new Error(
-                        `[Highlite] Unsupported setting type: ${setting.type} for ${settingKey}`
-                    );
+                    // I don't think it should ever reach the default case
+                    throw new Error(`[Highlite] Unsupported setting type for ${settingKey}`);
             }
     
             contentRow.title = setting.description
