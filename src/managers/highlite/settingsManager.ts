@@ -35,6 +35,9 @@ export class SettingsManager {
 
     public isInitialized = false;
 
+    private showAdvancedSettings = false;
+    private advancedSettingsPanels: HTMLElement[] = [];
+
     panelContainer: HTMLDivElement | null = null;
     currentView: HTMLDivElement | null = null;
     mainSettingsView: HTMLDivElement | null = null;
@@ -178,11 +181,13 @@ export class SettingsManager {
             }
         }
 
+        this.advancedSettingsPanels = [];        
+
         // This will either "update" or "create" the settings for each plugin on a user.
         for (let plugin of this.pluginList) {
             await this.storePluginSettings(this.username, plugin);
             this.makeSettingsReactive(plugin);
-            this.createPluginSettings(plugin);
+            this.advancedSettingsPanels.push(this.createPluginSettings(plugin));
         }
 
         return Promise.resolve();
@@ -225,7 +230,74 @@ export class SettingsManager {
         this.mainSettingsView.style.display = 'flex';
         this.mainSettingsView.style.flexDirection = 'column';
         this.mainSettingsView.style.padding = '8px';
-        this.mainSettingsView.style.gap = '2px';
+        this.mainSettingsView.style.gap = '8px';
+
+        
+        
+        // Advanced settings warning
+        const advancedSettingsWarning = document.createElement('div');
+        advancedSettingsWarning.innerText = '⚠️ Only import data and settings from trusted sources.\n\n🚧 Some plugins may need a restart for imported changes to take effect.';
+        advancedSettingsWarning.style.padding = '10px 12px';
+        advancedSettingsWarning.style.borderRadius = '8px';
+        advancedSettingsWarning.style.border = '1px solid var(--theme-border)';
+        advancedSettingsWarning.style.background = 'orangered';
+        advancedSettingsWarning.style.color = 'white';
+        advancedSettingsWarning.style.fontSize = '16px';
+        advancedSettingsWarning.style.fontFamily =
+            'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        advancedSettingsWarning.style.outline = 'none';
+        advancedSettingsWarning.style.transition = 'all 0.2s ease';
+        advancedSettingsWarning.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+        advancedSettingsWarning.style.display = 'none';
+
+        // Advanced settings warning
+        const advancedSettingsBox = document.createElement('div');
+        advancedSettingsBox.innerText = 'Advanced Settings';
+        advancedSettingsBox.style.padding = '10px 12px';
+        advancedSettingsBox.style.borderRadius = '8px';
+        advancedSettingsBox.style.border = '1px solid var(--theme-border)';
+        advancedSettingsBox.style.fontSize = '16px';
+        advancedSettingsBox.style.fontFamily =
+            'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        advancedSettingsBox.style.outline = 'none';
+        advancedSettingsBox.style.transition = 'all 0.2s ease';
+        // advancedSettingsBox.style.position = 'absolute';
+        // advancedSettingsBox.style.bottom = '12px';
+        advancedSettingsBox.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+
+        /* advanced settings toggle */
+        const advancedSettingsToggleSwitch = document.createElement('input');
+        advancedSettingsToggleSwitch.type = 'checkbox';
+        advancedSettingsToggleSwitch.checked = this.showAdvancedSettings;
+        advancedSettingsToggleSwitch.style.width = '16px';
+        advancedSettingsToggleSwitch.style.padding = '10px 12px';
+        advancedSettingsToggleSwitch.style.marginLeft = '12px';
+        advancedSettingsToggleSwitch.style.fontSize = '16px';
+        advancedSettingsToggleSwitch.style.accentColor = 'var(--theme-accent)';
+        advancedSettingsToggleSwitch.innerText = "Advanced Settings";
+        advancedSettingsToggleSwitch.addEventListener('change', async () => {
+            this.showAdvancedSettings = advancedSettingsToggleSwitch.checked;
+            if(this.showAdvancedSettings) {
+                advancedSettingsWarning.style.display = '';
+            } else {
+                advancedSettingsWarning.style.display = 'none';
+            }
+
+            this.advancedSettingsPanels.forEach((advancedPanel) => {
+                if(this.showAdvancedSettings) {
+                    advancedPanel.style.display = 'flex';
+                } else {
+                    advancedPanel.style.display = 'none';
+                }
+            })
+        });
+
+        advancedSettingsBox.appendChild(advancedSettingsToggleSwitch);
+
+        this.mainSettingsView.appendChild(advancedSettingsBox);
+        this.mainSettingsView.appendChild(advancedSettingsWarning);
+
+
 
         // Create search bar container
         const searchContainer = document.createElement('div');
@@ -285,30 +357,207 @@ export class SettingsManager {
         this.panelContainer.appendChild(this.currentView);
     }
 
-    private createPluginSettings(plugin: Plugin) {
+    private getAdvancedSettings(plugin: Plugin): HTMLElement {
+            const advancedBox = document.createElement('div');
+            // advancedBox.style.background = 'var(--theme-background-mute)';
+            // advancedBox.style.border = '1px solid var(--theme-border)';
+            // advancedBox.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+            advancedBox.style.minHeight = '24px';
+            advancedBox.style.display = 'none';
+            advancedBox.style.alignItems = 'center';
+            advancedBox.style.flexDirection = 'column';
+
+
+            
+            const importSettings = document.createElement('span');
+            importSettings.innerText = '📲 Import Settings';
+            importSettings.style.color = 'var(--theme-text-muted)';
+            importSettings.style.fontSize = '16px';
+            importSettings.style.marginRight = '8px';
+            importSettings.style.padding = '8px';
+            importSettings.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            importSettings.style.textAlign = 'right';
+            importSettings.style.cursor = 'pointer';
+            importSettings.style.borderRadius = '4px';
+            importSettings.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            importSettings.addEventListener('mouseenter', () => {
+                importSettings.style.color = 'var(--theme-text-primary)';
+                importSettings.style.background = 'var(--theme-border-light)';
+                importSettings.style.transform = 'scale(1.1)';
+            });
+            importSettings.addEventListener('mouseleave', () => {
+                importSettings.style.color = 'var(--theme-text-muted)';
+                importSettings.style.background = 'transparent';
+                importSettings.style.transform = 'scale(1)';
+            });
+            importSettings.addEventListener('click', () => {
+                // TODO
+            });
+            advancedBox.appendChild(importSettings);
+
+
+            const exportSettings = document.createElement('span');
+            exportSettings.innerText = '📱 Export Settings';
+            exportSettings.style.color = 'var(--theme-text-muted)';
+            exportSettings.style.fontSize = '16px';
+            exportSettings.style.marginRight = '8px';
+            exportSettings.style.padding = '8px';
+            exportSettings.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            exportSettings.style.textAlign = 'right';
+            exportSettings.style.cursor = 'pointer';
+            exportSettings.style.borderRadius = '4px';
+            exportSettings.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            exportSettings.addEventListener('mouseenter', () => {
+                exportSettings.style.color = 'var(--theme-text-primary)';
+                exportSettings.style.background = 'var(--theme-border-light)';
+                exportSettings.style.transform = 'scale(1.1)';
+            });
+            exportSettings.addEventListener('mouseleave', () => {
+                exportSettings.style.color = 'var(--theme-text-muted)';
+                exportSettings.style.background = 'transparent';
+                exportSettings.style.transform = 'scale(1)';
+            });
+            exportSettings.addEventListener('click', async () => {
+                const type = "text/plain"; // Need to do text plain since application/json is not guaranteed to be supported
+                const clipboardItemData = {
+                    [type]: JSON.stringify(plugin.settings),
+                };
+                const clipboardItem = new ClipboardItem(clipboardItemData);
+                await navigator.clipboard.write([clipboardItem]);
+            });
+            advancedBox.appendChild(exportSettings);
+
+
+            const importdata = document.createElement('span');
+            importdata.innerText = '📥 Import Data';
+            importdata.style.color = 'var(--theme-text-muted)';
+            importdata.style.fontSize = '16px';
+            importdata.style.marginRight = '8px';
+            importdata.style.padding = '8px';
+            importdata.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            importdata.style.textAlign = 'right';
+            importdata.style.cursor = 'pointer';
+            importdata.style.borderRadius = '4px';
+            importdata.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            importdata.addEventListener('mouseenter', () => {
+                importdata.style.color = 'var(--theme-text-primary)';
+                importdata.style.background = 'var(--theme-border-light)';
+                importdata.style.transform = 'scale(1.1)';
+            });
+            importdata.addEventListener('mouseleave', () => {
+                importdata.style.color = 'var(--theme-text-muted)';
+                importdata.style.background = 'transparent';
+                importdata.style.transform = 'scale(1)';
+            });
+            importdata.addEventListener('click', () => {
+                // TODO
+            });
+            advancedBox.appendChild(importdata);
+
+
+            const exportdata = document.createElement('span');
+            exportdata.innerText = '📤 Export Data';
+            exportdata.style.color = 'var(--theme-text-muted)';
+            exportdata.style.fontSize = '16px';
+            exportdata.style.marginRight = '8px';
+            exportdata.style.padding = '8px';
+            exportdata.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            exportdata.style.textAlign = 'right';
+            exportdata.style.cursor = 'pointer';
+            exportdata.style.borderRadius = '4px';
+            exportdata.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            exportdata.addEventListener('mouseenter', () => {
+                exportdata.style.color = 'var(--theme-text-primary)';
+                exportdata.style.background = 'var(--theme-border-light)';
+                exportdata.style.transform = 'scale(1.1)';
+            });
+            exportdata.addEventListener('mouseleave', () => {
+                exportdata.style.color = 'var(--theme-text-muted)';
+                exportdata.style.background = 'transparent';
+                exportdata.style.transform = 'scale(1)';
+            });
+            exportdata.addEventListener('click', () => {
+                // TODO
+            });
+            advancedBox.appendChild(exportdata);
+
+
+            
+            const resetdata = document.createElement('span');
+            resetdata.innerText = '♻️ Reset Data';
+            resetdata.style.color = 'var(--theme-text-muted)';
+            resetdata.style.fontSize = '16px';
+            resetdata.style.marginRight = '8px';
+            resetdata.style.padding = '8px';
+            resetdata.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            resetdata.style.textAlign = 'right';
+            resetdata.style.cursor = 'pointer';
+            resetdata.style.borderRadius = '4px';
+            resetdata.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            resetdata.addEventListener('mouseenter', () => {
+                resetdata.style.color = 'var(--theme-text-primary)';
+                resetdata.style.background = 'var(--theme-border-light)';
+                resetdata.style.transform = 'scale(1.1)';
+            });
+            resetdata.addEventListener('mouseleave', () => {
+                resetdata.style.color = 'var(--theme-text-muted)';
+                resetdata.style.background = 'transparent';
+                resetdata.style.transform = 'scale(1)';
+            });
+            resetdata.addEventListener('click', () => {
+                // TODO
+            });
+            advancedBox.appendChild(resetdata);
+
+            return advancedBox;
+    }
+
+    /*
+        @returns Returns the advanced settings element
+    */
+    private createPluginSettings(plugin: Plugin): HTMLElement {
+        const contentColumn = document.createElement('div');
+        contentColumn.style.display = 'flex';
+        contentColumn.style.alignItems = 'center';
+        contentColumn.style.flexDirection = 'column';
+        contentColumn.style.background = 'var(--theme-background-mute)';
+        contentColumn.style.borderRadius = '8px';
+        contentColumn.style.border = '1px solid var(--theme-border)';
+        contentColumn.style.margin = '2px 0';
+        contentColumn.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+        contentColumn.style.transition = 'all 0.2s ease';
+        contentColumn.style.minHeight = '48px';
+
+        // Add hover effect
+        contentColumn.addEventListener('mouseenter', () => {
+            contentColumn.style.background = 'var(--theme-background-light)';
+            contentColumn.style.border = '1px solid var(--theme-divider)';
+            contentColumn.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)';
+        });
+        contentColumn.addEventListener('mouseleave', () => {
+            contentColumn.style.background = 'var(--theme-background-mute)';
+            contentColumn.style.border = '1px solid var(--theme-border)';
+            contentColumn.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+        });
+
+
         const contentRow = document.createElement('div');
         contentRow.id = `highlite-settings-content-row-${plugin.pluginName}`;
         contentRow.style.minHeight = '48px';
         contentRow.style.display = 'flex';
         contentRow.style.alignItems = 'center';
-        contentRow.style.background = 'var(--theme-background-mute)';
-        contentRow.style.borderRadius = '8px';
-        contentRow.style.border = '1px solid var(--theme-border)';
-        contentRow.style.margin = '2px 0';
         contentRow.style.transition = 'all 0.2s ease';
-        contentRow.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
-
-        // Add hover effect
-        contentRow.addEventListener('mouseenter', () => {
-            contentRow.style.background = 'var(--theme-background-light)';
-            contentRow.style.border = '1px solid var(--theme-divider)';
-            contentRow.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)';
-        });
-        contentRow.addEventListener('mouseleave', () => {
-            contentRow.style.background = 'var(--theme-background-mute)';
-            contentRow.style.border = '1px solid var(--theme-border)';
-            contentRow.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
-        });
+        contentRow.style.width = '-webkit-fill-available';
 
         // Create a container for plugin name and author
         const pluginInfoContainer = document.createElement('div');
@@ -415,7 +664,13 @@ export class SettingsManager {
         contentRow.appendChild(cogIcon);
         contentRow.appendChild(toggleSwitch);
 
-        this.mainSettingsView!.appendChild(contentRow);
+        contentColumn.appendChild(contentRow);
+        let advancedSettings = this.getAdvancedSettings(plugin);
+        contentColumn.appendChild(advancedSettings);
+
+        this.mainSettingsView!.appendChild(contentColumn);
+
+        return advancedSettings;
     }
 
     private openPluginSettings(plugin: Plugin) {
