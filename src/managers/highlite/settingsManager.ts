@@ -35,9 +35,6 @@ export class SettingsManager {
 
     public isInitialized = false;
 
-    private showAdvancedSettings = false;
-    private advancedSettingsPanels: HTMLElement[] = [];
-
     panelContainer: HTMLDivElement | null = null;
     currentView: HTMLDivElement | null = null;
     mainSettingsView: HTMLDivElement | null = null;
@@ -180,14 +177,12 @@ export class SettingsManager {
                 }
             }
         }
-
-        this.advancedSettingsPanels = [];        
-
+        
         // This will either "update" or "create" the settings for each plugin on a user.
         for (let plugin of this.pluginList) {
             await this.storePluginSettings(this.username, plugin);
             this.makeSettingsReactive(plugin);
-            this.advancedSettingsPanels.push(this.createPluginSettings(plugin));
+            this.createPluginSettings(plugin);
         }
 
         return Promise.resolve();
@@ -230,73 +225,7 @@ export class SettingsManager {
         this.mainSettingsView.style.display = 'flex';
         this.mainSettingsView.style.flexDirection = 'column';
         this.mainSettingsView.style.padding = '8px';
-        this.mainSettingsView.style.gap = '8px';
-
-        
-        
-        // Advanced settings warning
-        const advancedSettingsWarning = document.createElement('div');
-        advancedSettingsWarning.innerText = '⚠️ Only import data and settings from trusted sources.\n\n🚧 Some plugins may need a restart for imported changes to take effect.';
-        advancedSettingsWarning.style.padding = '10px 12px';
-        advancedSettingsWarning.style.borderRadius = '8px';
-        advancedSettingsWarning.style.border = '1px solid var(--theme-border)';
-        advancedSettingsWarning.style.background = 'orangered';
-        advancedSettingsWarning.style.color = 'white';
-        advancedSettingsWarning.style.fontSize = '16px';
-        advancedSettingsWarning.style.fontFamily =
-            'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-        advancedSettingsWarning.style.outline = 'none';
-        advancedSettingsWarning.style.transition = 'all 0.2s ease';
-        advancedSettingsWarning.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
-        advancedSettingsWarning.style.display = 'none';
-
-        // Advanced settings warning
-        const advancedSettingsBox = document.createElement('div');
-        advancedSettingsBox.innerText = 'Advanced Settings';
-        advancedSettingsBox.style.padding = '10px 12px';
-        advancedSettingsBox.style.borderRadius = '8px';
-        advancedSettingsBox.style.border = '1px solid var(--theme-border)';
-        advancedSettingsBox.style.fontSize = '16px';
-        advancedSettingsBox.style.fontFamily =
-            'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-        advancedSettingsBox.style.outline = 'none';
-        advancedSettingsBox.style.transition = 'all 0.2s ease';
-        // advancedSettingsBox.style.position = 'absolute';
-        // advancedSettingsBox.style.bottom = '12px';
-        advancedSettingsBox.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
-
-        /* advanced settings toggle */
-        const advancedSettingsToggleSwitch = document.createElement('input');
-        advancedSettingsToggleSwitch.type = 'checkbox';
-        advancedSettingsToggleSwitch.checked = this.showAdvancedSettings;
-        advancedSettingsToggleSwitch.style.width = '16px';
-        advancedSettingsToggleSwitch.style.padding = '10px 12px';
-        advancedSettingsToggleSwitch.style.marginLeft = '12px';
-        advancedSettingsToggleSwitch.style.fontSize = '16px';
-        advancedSettingsToggleSwitch.style.accentColor = 'var(--theme-accent)';
-        advancedSettingsToggleSwitch.innerText = "Advanced Settings";
-        advancedSettingsToggleSwitch.addEventListener('change', async () => {
-            this.showAdvancedSettings = advancedSettingsToggleSwitch.checked;
-            if(this.showAdvancedSettings) {
-                advancedSettingsWarning.style.display = '';
-            } else {
-                advancedSettingsWarning.style.display = 'none';
-            }
-
-            this.advancedSettingsPanels.forEach((advancedPanel) => {
-                if(this.showAdvancedSettings) {
-                    advancedPanel.style.display = 'flex';
-                } else {
-                    advancedPanel.style.display = 'none';
-                }
-            })
-        });
-
-        advancedSettingsBox.appendChild(advancedSettingsToggleSwitch);
-
-        this.mainSettingsView.appendChild(advancedSettingsBox);
-        this.mainSettingsView.appendChild(advancedSettingsWarning);
-
+        this.mainSettingsView.style.gap = '2px';
 
 
         // Create search bar container
@@ -364,9 +293,10 @@ export class SettingsManager {
             // advancedBox.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
             advancedBox.style.minHeight = '24px';
             advancedBox.style.display = 'none';
-            advancedBox.style.alignItems = 'center';
+            advancedBox.style.alignItems = 'left';
             advancedBox.style.flexDirection = 'column';
-
+            advancedBox.style.gap = '4px';
+            advancedBox.style.padding = '10px 12px';
 
             
             const importSettings = document.createElement('span');
@@ -377,7 +307,7 @@ export class SettingsManager {
             importSettings.style.padding = '8px';
             importSettings.style.fontFamily =
                 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-            importSettings.style.textAlign = 'right';
+            importSettings.style.textAlign = 'left';
             importSettings.style.cursor = 'pointer';
             importSettings.style.borderRadius = '4px';
             importSettings.style.transition = 'all 0.2s ease';
@@ -406,7 +336,7 @@ export class SettingsManager {
             exportSettings.style.padding = '8px';
             exportSettings.style.fontFamily =
                 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-            exportSettings.style.textAlign = 'right';
+            exportSettings.style.textAlign = 'left';
             exportSettings.style.cursor = 'pointer';
             exportSettings.style.borderRadius = '4px';
             exportSettings.style.transition = 'all 0.2s ease';
@@ -440,7 +370,7 @@ export class SettingsManager {
             importdata.style.padding = '8px';
             importdata.style.fontFamily =
                 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-            importdata.style.textAlign = 'right';
+            importdata.style.textAlign = 'left';
             importdata.style.cursor = 'pointer';
             importdata.style.borderRadius = '4px';
             importdata.style.transition = 'all 0.2s ease';
@@ -469,7 +399,7 @@ export class SettingsManager {
             exportdata.style.padding = '8px';
             exportdata.style.fontFamily =
                 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-            exportdata.style.textAlign = 'right';
+            exportdata.style.textAlign = 'left';
             exportdata.style.cursor = 'pointer';
             exportdata.style.borderRadius = '4px';
             exportdata.style.transition = 'all 0.2s ease';
@@ -499,7 +429,7 @@ export class SettingsManager {
             resetdata.style.padding = '8px';
             resetdata.style.fontFamily =
                 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-            resetdata.style.textAlign = 'right';
+            resetdata.style.textAlign = 'left';
             resetdata.style.cursor = 'pointer';
             resetdata.style.borderRadius = '4px';
             resetdata.style.transition = 'all 0.2s ease';
@@ -518,6 +448,39 @@ export class SettingsManager {
                 // TODO
             });
             advancedBox.appendChild(resetdata);
+
+            // Advanced settings warning
+            const advancedSettingsWarning = document.createElement('div');
+            advancedSettingsWarning.innerText = '⚠️ Only import data and settings from trusted sources.';
+            advancedSettingsWarning.style.padding = '10px 12px';
+            advancedSettingsWarning.style.borderRadius = '8px';
+            advancedSettingsWarning.style.border = '1px solid var(--theme-border)';
+            advancedSettingsWarning.style.background = 'tomato';
+            advancedSettingsWarning.style.color = 'white';
+            advancedSettingsWarning.style.fontSize = '14px';
+            advancedSettingsWarning.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            advancedSettingsWarning.style.outline = 'none';
+            advancedSettingsWarning.style.transition = 'all 0.2s ease';
+            advancedSettingsWarning.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+
+                        // Advanced settings warning
+            const advancedSettingsWarning2 = document.createElement('div');
+            advancedSettingsWarning2.innerText = '🚧 Some plugins may need a restart for imported changes to take effect.';
+            advancedSettingsWarning2.style.padding = '10px 12px';
+            advancedSettingsWarning2.style.borderRadius = '8px';
+            advancedSettingsWarning2.style.border = '1px solid var(--theme-border)';
+            advancedSettingsWarning2.style.background = 'darkgoldenrod';
+            advancedSettingsWarning2.style.color = 'white';
+            advancedSettingsWarning2.style.fontSize = '14px';
+            advancedSettingsWarning2.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            advancedSettingsWarning2.style.outline = 'none';
+            advancedSettingsWarning2.style.transition = 'all 0.2s ease';
+            advancedSettingsWarning2.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+
+            advancedBox.appendChild(advancedSettingsWarning);
+            advancedBox.appendChild(advancedSettingsWarning2);
 
             return advancedBox;
     }
@@ -567,6 +530,16 @@ export class SettingsManager {
         pluginInfoContainer.style.minWidth = '0';
         pluginInfoContainer.style.padding = '12px 16px';
 
+        const pluginInfoRow = document.createElement('div');
+        pluginInfoRow.id = `highlite-settings-info-row-${plugin.pluginName}`;
+        pluginInfoRow.style.minHeight = '36px';
+        pluginInfoRow.style.paddingTop = '8px';
+        pluginInfoRow.style.display = 'flex';
+        pluginInfoRow.style.flexDirection = 'column';
+        pluginInfoRow.style.alignItems = 'center';
+        pluginInfoRow.style.transition = 'all 0.2s ease';
+        pluginInfoRow.style.width = '-webkit-fill-available';
+
         const pluginName = document.createElement('span');
         pluginName.innerText = plugin.pluginName;
         pluginName.style.color = 'var(--theme-text-primary)';
@@ -599,8 +572,10 @@ export class SettingsManager {
         pluginAuthor.style.textOverflow = 'ellipsis';
         pluginAuthor.title = `by ${plugin.author}`; // Show full text on hover
 
-        pluginInfoContainer.appendChild(pluginName);
-        pluginInfoContainer.appendChild(pluginAuthor);
+        pluginInfoRow.appendChild(pluginName);
+        pluginInfoRow.appendChild(pluginAuthor);
+
+        contentColumn.appendChild(pluginInfoRow);
 
         /* this is for the enable section */
         const toggleSwitch = document.createElement('input');
@@ -633,7 +608,7 @@ export class SettingsManager {
         cogIcon.style.padding = '8px';
         cogIcon.style.fontFamily =
             'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-        cogIcon.style.textAlign = 'right';
+        cogIcon.style.textAlign = 'left';
         cogIcon.style.cursor = 'pointer';
         cogIcon.style.borderRadius = '4px';
         cogIcon.style.transition = 'all 0.2s ease';
@@ -660,12 +635,49 @@ export class SettingsManager {
             cogIcon.style.display = 'none';
         }
 
+        let advancedSettings = this.getAdvancedSettings(plugin);
+
+        const importExportIcon = document.createElement('span');
+        importExportIcon.innerText = '📁';
+        importExportIcon.style.color = 'var(--theme-text-muted)';
+        importExportIcon.style.fontSize = '18px';
+        importExportIcon.style.marginRight = '8px';
+        importExportIcon.style.padding = '8px';
+        importExportIcon.style.fontFamily =
+            'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        importExportIcon.style.textAlign = 'left';
+        importExportIcon.style.cursor = 'pointer';
+        importExportIcon.style.borderRadius = '4px';
+        importExportIcon.style.transition = 'all 0.2s ease';
+
+        // Add hover effect for cog icon
+        importExportIcon.addEventListener('mouseenter', () => {
+            importExportIcon.style.color = 'var(--theme-text-primary)';
+            importExportIcon.style.background = 'var(--theme-border-light)';
+            importExportIcon.style.transform = 'scale(1.1)';
+        });
+        importExportIcon.addEventListener('mouseleave', () => {
+            importExportIcon.style.color = 'var(--theme-text-muted)';
+            importExportIcon.style.background = 'transparent';
+            importExportIcon.style.transform = 'scale(1)';
+        });
+
+        importExportIcon.addEventListener('click', () => {
+            if(advancedSettings.style.display === 'none') {
+                advancedSettings.style.display = 'flex'
+                importExportIcon.innerText = '📂'
+            } else {
+                advancedSettings.style.display = 'none'
+                importExportIcon.innerText = '📁'
+            }
+        });
+
         contentRow.appendChild(pluginInfoContainer);
         contentRow.appendChild(cogIcon);
+        contentRow.appendChild(importExportIcon);
         contentRow.appendChild(toggleSwitch);
 
         contentColumn.appendChild(contentRow);
-        let advancedSettings = this.getAdvancedSettings(plugin);
         contentColumn.appendChild(advancedSettings);
 
         this.mainSettingsView!.appendChild(contentColumn);
