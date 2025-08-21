@@ -516,7 +516,7 @@ export class SettingsManager {
 
             // Advanced settings warning
             const advancedSettingsWarning = document.createElement('div');
-            advancedSettingsWarning.innerText = '⚠️ Only import data and settings from trusted sources.';
+            advancedSettingsWarning.innerText = `⚠️ Only import data ${Object.keys(plugin.settings).length === 1 ? '' : 'and settings '}from trusted sources.`;
             advancedSettingsWarning.style.padding = '10px 12px';
             advancedSettingsWarning.style.borderRadius = '8px';
             advancedSettingsWarning.style.border = '1px solid var(--theme-border)';
@@ -529,23 +529,7 @@ export class SettingsManager {
             advancedSettingsWarning.style.transition = 'all 0.2s ease';
             advancedSettingsWarning.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
 
-            // Advanced settings warning
-            const advancedSettingsWarning2 = document.createElement('div');
-            advancedSettingsWarning2.innerText = '🚧 Some plugins may need a restart for imported changes to take effect.';
-            advancedSettingsWarning2.style.padding = '10px 12px';
-            advancedSettingsWarning2.style.borderRadius = '8px';
-            advancedSettingsWarning2.style.border = '1px solid var(--theme-border)';
-            advancedSettingsWarning2.style.background = 'darkgoldenrod';
-            advancedSettingsWarning2.style.color = 'white';
-            advancedSettingsWarning2.style.fontSize = '14px';
-            advancedSettingsWarning2.style.fontFamily =
-                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-            advancedSettingsWarning2.style.outline = 'none';
-            advancedSettingsWarning2.style.transition = 'all 0.2s ease';
-            advancedSettingsWarning2.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
-
             advancedBox.appendChild(advancedSettingsWarning);
-            advancedBox.appendChild(advancedSettingsWarning2);
 
             return advancedBox;
     }
