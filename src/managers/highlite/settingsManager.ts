@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import { type IDBPDatabase } from 'idb';
 import type { HighliteSchema } from '../../interfaces/highlite/database/database.schema';
 import { type Plugin } from '../../interfaces/highlite/plugin/plugin.class';
-import { SettingsTypes } from '../../interfaces/highlite/plugin/pluginSettings.interface';
+import { PluginSettings, SettingsTypes } from '../../interfaces/highlite/plugin/pluginSettings.interface';
 import type { PanelManager } from './panelManager';
 
 export class SettingsManager {
@@ -322,11 +322,26 @@ export class SettingsManager {
                 importSettings.style.background = 'transparent';
                 importSettings.style.transform = 'scale(1)';
             });
-            importSettings.addEventListener('click', () => {
-                // TODO
+            importSettings.addEventListener('click', async () => {
+                await navigator.clipboard
+                    .readText()
+                    .then((clipText) => {
+                        let importDataJson = JSON.parse(clipText);
+                        Object.entries(importDataJson).forEach((entry) => {
+                            let key: string = entry[0];
+                            let value: PluginSettings = entry[1] as PluginSettings;
+                            plugin.settings[key].value = value.value;
+                        });
+                    });
+                await this.storePluginSettings(this.username, plugin);
+
+                // Refresh visibility of all settings in case dependencies changed
+                this.refreshPluginSettingsVisibility(plugin);
+
+                // Refresh disabled state of all settings in case dependencies changed
+                this.refreshPluginSettingsDisabled(plugin);
             });
             advancedBox.appendChild(importSettings);
-
 
             const exportSettings = document.createElement('span');
             exportSettings.innerText = '📱 Export Settings';
@@ -385,8 +400,15 @@ export class SettingsManager {
                 importdata.style.background = 'transparent';
                 importdata.style.transform = 'scale(1)';
             });
-            importdata.addEventListener('click', () => {
-                // TODO
+            importdata.addEventListener('click', async () => {
+                await navigator.clipboard
+                    .readText()
+                    .then((clipText) => {
+                        let importDataJson = JSON.parse(clipText);
+                        Object.entries(importDataJson).forEach(([key, value]) => {
+                            plugin.data[key] = value;
+                        })
+                    });
             });
             advancedBox.appendChild(importdata);
 
@@ -414,40 +436,15 @@ export class SettingsManager {
                 exportdata.style.background = 'transparent';
                 exportdata.style.transform = 'scale(1)';
             });
-            exportdata.addEventListener('click', () => {
-                // TODO
+            exportdata.addEventListener('click', async () => {
+                const type = "text/plain"; // Need to do text plain since application/json is not guaranteed to be supported
+                const clipboardItemData = {
+                    [type]: JSON.stringify(plugin.data),
+                };
+                const clipboardItem = new ClipboardItem(clipboardItemData);
+                await navigator.clipboard.write([clipboardItem]);
             });
             advancedBox.appendChild(exportdata);
-
-
-            
-            const resetdata = document.createElement('span');
-            resetdata.innerText = '♻️ Reset Data';
-            resetdata.style.color = 'var(--theme-text-muted)';
-            resetdata.style.fontSize = '16px';
-            resetdata.style.marginRight = '8px';
-            resetdata.style.padding = '8px';
-            resetdata.style.fontFamily =
-                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-            resetdata.style.textAlign = 'left';
-            resetdata.style.cursor = 'pointer';
-            resetdata.style.borderRadius = '4px';
-            resetdata.style.transition = 'all 0.2s ease';
-            // Add hover effect for cog icon
-            resetdata.addEventListener('mouseenter', () => {
-                resetdata.style.color = 'var(--theme-text-primary)';
-                resetdata.style.background = 'var(--theme-border-light)';
-                resetdata.style.transform = 'scale(1.1)';
-            });
-            resetdata.addEventListener('mouseleave', () => {
-                resetdata.style.color = 'var(--theme-text-muted)';
-                resetdata.style.background = 'transparent';
-                resetdata.style.transform = 'scale(1)';
-            });
-            resetdata.addEventListener('click', () => {
-                // TODO
-            });
-            advancedBox.appendChild(resetdata);
 
             // Advanced settings warning
             const advancedSettingsWarning = document.createElement('div');
@@ -464,7 +461,7 @@ export class SettingsManager {
             advancedSettingsWarning.style.transition = 'all 0.2s ease';
             advancedSettingsWarning.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
 
-                        // Advanced settings warning
+            // Advanced settings warning
             const advancedSettingsWarning2 = document.createElement('div');
             advancedSettingsWarning2.innerText = '🚧 Some plugins may need a restart for imported changes to take effect.';
             advancedSettingsWarning2.style.padding = '10px 12px';
