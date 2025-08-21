@@ -333,6 +333,7 @@ export class SettingsManager {
                         if(!importDataJson.pluginSettings) {
                             throw new Error('No settings found')
                         }
+                        
                         Object.entries(importDataJson.pluginSettings).forEach((entry) => {
                             let key: string = entry[0];
                             let value: PluginSettings = entry[1] as PluginSettings;
@@ -349,6 +350,11 @@ export class SettingsManager {
                 // Refresh disabled state of all settings in case dependencies changed
                 this.refreshPluginSettingsDisabled(plugin);
             });
+
+            // If plugin only has the enable setting, hide import/export settings
+            if (Object.keys(plugin.settings).length === 1) {
+                importSettings.style.display = 'none';
+            }
             advancedBox.appendChild(importSettings);
 
             const exportSettings = document.createElement('span');
@@ -376,7 +382,7 @@ export class SettingsManager {
             });
             exportSettings.addEventListener('click', async () => {
                 const type = "text/plain"; // Need to do text plain since application/json is not guaranteed to be supported
-                const clipboardItemData = {
+                const clipboardItemData = { 
                     [type]: JSON.stringify({
                         pluginName: plugin.pluginName,
                         pluginSettings: plugin.settings,
@@ -385,6 +391,12 @@ export class SettingsManager {
                 const clipboardItem = new ClipboardItem(clipboardItemData);
                 await navigator.clipboard.write([clipboardItem]);
             });
+            // If plugin only has the enable setting, hide import/export settings
+            if (Object.keys(plugin.settings).length === 1) {
+                exportSettings.style.display = 'none';
+            }
+            advancedBox.appendChild(importSettings);
+
             advancedBox.appendChild(exportSettings);
 
 
@@ -414,7 +426,7 @@ export class SettingsManager {
             importdata.addEventListener('click', async () => {
                 await navigator.clipboard
                     .readText()
-                    .then((clipText) => {
+                    .then(async (clipText) => {
                         let importDataJson = JSON.parse(clipText);
 
                         if(importDataJson.pluginName !== plugin.pluginName) {
@@ -423,9 +435,42 @@ export class SettingsManager {
                         if(!importDataJson.pluginData) {
                             throw new Error('No data found')
                         }
+
+                        var originallyEnabled = plugin.settings.enable.value;
+
+                        if(originallyEnabled) {
+                            // Turn off plugin before modifying
+                            plugin.settings.enable.value = false;
+                            try {
+                                plugin.settings.enable.callback.call(plugin);
+                            } catch (error) {
+                                console.error(`Error calling enable callback for plugin ${plugin.pluginName}:`, error);
+                                console.error(`Continuing without calling the callback.`);
+                            }
+                            await this.storePluginSettings(this.username, plugin);
+                        }
+
+                        // Clear extra data first
+                        Object.entries(plugin.data).forEach(([key, value]) => {
+                            delete plugin.data[key];
+                        })
+
                         Object.entries(importDataJson.pluginData).forEach(([key, value]) => {
                             plugin.data[key] = value;
                         })
+
+                        if(originallyEnabled) {
+                            // Reenable plugin
+                            plugin.settings.enable.value = true;
+                            try {
+                                plugin.settings.enable.callback.call(plugin);
+                            } catch (error) {
+                                console.error(`Error calling enable callback for plugin ${plugin.pluginName}:`, error);
+                                console.error(`Continuing without calling the callback.`);
+                            }
+                            await this.storePluginSettings(this.username, plugin);
+                        }
+
                     }).catch((e) => {
                         console.error("Attempted to import data with invalid JSON", e);
                     });
