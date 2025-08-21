@@ -512,6 +512,10 @@ export class SettingsManager {
                 const clipboardItem = new ClipboardItem(clipboardItemData);
                 await navigator.clipboard.write([clipboardItem]);
             });
+            // If plugin lacks data, hide export data
+            if (Object.keys(plugin.data).length === 1) {
+                exportdata.style.display = 'none';
+            }
             advancedBox.appendChild(exportdata);
 
             // Advanced settings warning
