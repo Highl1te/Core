@@ -327,11 +327,19 @@ export class SettingsManager {
                     .readText()
                     .then((clipText) => {
                         let importDataJson = JSON.parse(clipText);
-                        Object.entries(importDataJson).forEach((entry) => {
+                        if(importDataJson.pluginName !== plugin.pluginName) {
+                            throw new Error('Mismatched plugin name')
+                        }
+                        if(!importDataJson.pluginSettings) {
+                            throw new Error('No settings found')
+                        }
+                        Object.entries(importDataJson.pluginSettings).forEach((entry) => {
                             let key: string = entry[0];
                             let value: PluginSettings = entry[1] as PluginSettings;
                             plugin.settings[key].value = value.value;
                         });
+                    }).catch((e) => {
+                        console.error("Attempted to import settings with invalid JSON", e);
                     });
                 await this.storePluginSettings(this.username, plugin);
 
@@ -369,7 +377,10 @@ export class SettingsManager {
             exportSettings.addEventListener('click', async () => {
                 const type = "text/plain"; // Need to do text plain since application/json is not guaranteed to be supported
                 const clipboardItemData = {
-                    [type]: JSON.stringify(plugin.settings),
+                    [type]: JSON.stringify({
+                        pluginName: plugin.pluginName,
+                        pluginSettings: plugin.settings,
+                    }),
                 };
                 const clipboardItem = new ClipboardItem(clipboardItemData);
                 await navigator.clipboard.write([clipboardItem]);
@@ -405,9 +416,18 @@ export class SettingsManager {
                     .readText()
                     .then((clipText) => {
                         let importDataJson = JSON.parse(clipText);
-                        Object.entries(importDataJson).forEach(([key, value]) => {
+
+                        if(importDataJson.pluginName !== plugin.pluginName) {
+                            throw new Error('Mismatched plugin name')
+                        }
+                        if(!importDataJson.pluginData) {
+                            throw new Error('No data found')
+                        }
+                        Object.entries(importDataJson.pluginData).forEach(([key, value]) => {
                             plugin.data[key] = value;
                         })
+                    }).catch((e) => {
+                        console.error("Attempted to import data with invalid JSON", e);
                     });
             });
             advancedBox.appendChild(importdata);
@@ -437,9 +457,12 @@ export class SettingsManager {
                 exportdata.style.transform = 'scale(1)';
             });
             exportdata.addEventListener('click', async () => {
-                const type = "text/plain"; // Need to do text plain since application/json is not guaranteed to be supported
+                const type = "text/plain"; // Need to do 'text/plain' since application/json is not guaranteed to be supported
                 const clipboardItemData = {
-                    [type]: JSON.stringify(plugin.data),
+                    [type]: JSON.stringify({
+                        pluginName: plugin.pluginName,
+                        pluginData: plugin.data
+                    })
                 };
                 const clipboardItem = new ClipboardItem(clipboardItemData);
                 await navigator.clipboard.write([clipboardItem]);
