@@ -292,15 +292,55 @@ export class SettingsManager {
             // advancedBox.style.border = '1px solid var(--theme-border)';
             // advancedBox.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
             advancedBox.style.minHeight = '24px';
-            advancedBox.style.display = 'none';
+            advancedBox.style.display = 'flex';
             advancedBox.style.alignItems = 'left';
-            advancedBox.style.flexDirection = 'column';
+            advancedBox.style.flexDirection = 'row';
             advancedBox.style.gap = '4px';
-            advancedBox.style.padding = '10px 12px';
 
+            const exportSettings = document.createElement('span');
+            exportSettings.innerText = '📱';
+            exportSettings.title = 'Export Settings To Clipboard';
+            exportSettings.style.color = 'var(--theme-text-muted)';
+            exportSettings.style.fontSize = '16px';
+            exportSettings.style.marginRight = '8px';
+            exportSettings.style.padding = '8px';
+            exportSettings.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            exportSettings.style.textAlign = 'left';
+            exportSettings.style.cursor = 'pointer';
+            exportSettings.style.borderRadius = '4px';
+            exportSettings.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            exportSettings.addEventListener('mouseenter', () => {
+                exportSettings.style.color = 'var(--theme-text-primary)';
+                exportSettings.style.background = 'var(--theme-border-light)';
+                exportSettings.style.transform = 'scale(1.1)';
+            });
+            exportSettings.addEventListener('mouseleave', () => {
+                exportSettings.style.color = 'var(--theme-text-muted)';
+                exportSettings.style.background = 'transparent';
+                exportSettings.style.transform = 'scale(1)';
+            });
+            exportSettings.addEventListener('click', async () => {
+                const type = "text/plain"; // Need to do text plain since application/json is not guaranteed to be supported
+                const clipboardItemData = { 
+                    [type]: JSON.stringify({
+                        pluginName: plugin.pluginName,
+                        pluginSettings: plugin.settings,
+                    }),
+                };
+                const clipboardItem = new ClipboardItem(clipboardItemData);
+                await navigator.clipboard.write([clipboardItem]);
+            });
+            // If plugin only has the enable setting, hide import/export settings
+            if (Object.keys(plugin.settings).length === 1) {
+                exportSettings.style.display = 'none';
+            }
+            advancedBox.appendChild(exportSettings);
             
             const importSettings = document.createElement('span');
-            importSettings.innerText = '📲 Import Settings';
+            importSettings.innerText = '📲';
+            importSettings.title = 'Import Settings From Clipboard';
             importSettings.style.color = 'var(--theme-text-muted)';
             importSettings.style.fontSize = '16px';
             importSettings.style.marginRight = '8px';
@@ -357,51 +397,53 @@ export class SettingsManager {
             }
             advancedBox.appendChild(importSettings);
 
-            const exportSettings = document.createElement('span');
-            exportSettings.innerText = '📱 Export Settings';
-            exportSettings.style.color = 'var(--theme-text-muted)';
-            exportSettings.style.fontSize = '16px';
-            exportSettings.style.marginRight = '8px';
-            exportSettings.style.padding = '8px';
-            exportSettings.style.fontFamily =
+
+            
+            const exportdata = document.createElement('span');
+            exportdata.innerText = '📤';
+            exportdata.title = 'Export Data To Clipboard';
+            exportdata.style.color = 'var(--theme-text-muted)';
+            exportdata.style.fontSize = '16px';
+            exportdata.style.marginRight = '8px';
+            exportdata.style.padding = '8px';
+            exportdata.style.fontFamily =
                 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-            exportSettings.style.textAlign = 'left';
-            exportSettings.style.cursor = 'pointer';
-            exportSettings.style.borderRadius = '4px';
-            exportSettings.style.transition = 'all 0.2s ease';
+            exportdata.style.textAlign = 'left';
+            exportdata.style.cursor = 'pointer';
+            exportdata.style.borderRadius = '4px';
+            exportdata.style.transition = 'all 0.2s ease';
             // Add hover effect for cog icon
-            exportSettings.addEventListener('mouseenter', () => {
-                exportSettings.style.color = 'var(--theme-text-primary)';
-                exportSettings.style.background = 'var(--theme-border-light)';
-                exportSettings.style.transform = 'scale(1.1)';
+            exportdata.addEventListener('mouseenter', () => {
+                exportdata.style.color = 'var(--theme-text-primary)';
+                exportdata.style.background = 'var(--theme-border-light)';
+                exportdata.style.transform = 'scale(1.1)';
             });
-            exportSettings.addEventListener('mouseleave', () => {
-                exportSettings.style.color = 'var(--theme-text-muted)';
-                exportSettings.style.background = 'transparent';
-                exportSettings.style.transform = 'scale(1)';
+            exportdata.addEventListener('mouseleave', () => {
+                exportdata.style.color = 'var(--theme-text-muted)';
+                exportdata.style.background = 'transparent';
+                exportdata.style.transform = 'scale(1)';
             });
-            exportSettings.addEventListener('click', async () => {
-                const type = "text/plain"; // Need to do text plain since application/json is not guaranteed to be supported
-                const clipboardItemData = { 
+            exportdata.addEventListener('click', async () => {
+                const type = "text/plain"; // Need to do 'text/plain' since application/json is not guaranteed to be supported
+                const clipboardItemData = {
                     [type]: JSON.stringify({
                         pluginName: plugin.pluginName,
-                        pluginSettings: plugin.settings,
-                    }),
+                        pluginData: plugin.data
+                    })
                 };
                 const clipboardItem = new ClipboardItem(clipboardItemData);
                 await navigator.clipboard.write([clipboardItem]);
             });
-            // If plugin only has the enable setting, hide import/export settings
-            if (Object.keys(plugin.settings).length === 1) {
-                exportSettings.style.display = 'none';
+            // If plugin lacks data, hide export data
+            if (Object.keys(plugin.data).length === 1) {
+                exportdata.style.display = 'none';
             }
-            advancedBox.appendChild(importSettings);
-
-            advancedBox.appendChild(exportSettings);
+            advancedBox.appendChild(exportdata);
 
 
             const importdata = document.createElement('span');
-            importdata.innerText = '📥 Import Data';
+            importdata.innerText = '📥';
+            importdata.title = 'Import Data From Clipboard'
             importdata.style.color = 'var(--theme-text-muted)';
             importdata.style.fontSize = '16px';
             importdata.style.marginRight = '8px';
@@ -477,103 +519,32 @@ export class SettingsManager {
             });
             advancedBox.appendChild(importdata);
 
-
-            const exportdata = document.createElement('span');
-            exportdata.innerText = '📤 Export Data';
-            exportdata.style.color = 'var(--theme-text-muted)';
-            exportdata.style.fontSize = '16px';
-            exportdata.style.marginRight = '8px';
-            exportdata.style.padding = '8px';
-            exportdata.style.fontFamily =
-                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-            exportdata.style.textAlign = 'left';
-            exportdata.style.cursor = 'pointer';
-            exportdata.style.borderRadius = '4px';
-            exportdata.style.transition = 'all 0.2s ease';
-            // Add hover effect for cog icon
-            exportdata.addEventListener('mouseenter', () => {
-                exportdata.style.color = 'var(--theme-text-primary)';
-                exportdata.style.background = 'var(--theme-border-light)';
-                exportdata.style.transform = 'scale(1.1)';
-            });
-            exportdata.addEventListener('mouseleave', () => {
-                exportdata.style.color = 'var(--theme-text-muted)';
-                exportdata.style.background = 'transparent';
-                exportdata.style.transform = 'scale(1)';
-            });
-            exportdata.addEventListener('click', async () => {
-                const type = "text/plain"; // Need to do 'text/plain' since application/json is not guaranteed to be supported
-                const clipboardItemData = {
-                    [type]: JSON.stringify({
-                        pluginName: plugin.pluginName,
-                        pluginData: plugin.data
-                    })
-                };
-                const clipboardItem = new ClipboardItem(clipboardItemData);
-                await navigator.clipboard.write([clipboardItem]);
-            });
-            // If plugin lacks data, hide export data
-            if (Object.keys(plugin.data).length === 1) {
-                exportdata.style.display = 'none';
-            }
-            advancedBox.appendChild(exportdata);
-
-            // Advanced settings warning
-            const advancedSettingsWarning = document.createElement('div');
-            advancedSettingsWarning.innerText = `⚠️ Only import data ${Object.keys(plugin.settings).length === 1 ? '' : 'and settings '}from trusted sources.`;
-            advancedSettingsWarning.style.padding = '10px 12px';
-            advancedSettingsWarning.style.borderRadius = '8px';
-            advancedSettingsWarning.style.border = '1px solid var(--theme-border)';
-            advancedSettingsWarning.style.background = 'tomato';
-            advancedSettingsWarning.style.color = 'white';
-            advancedSettingsWarning.style.fontSize = '14px';
-            advancedSettingsWarning.style.fontFamily =
-                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-            advancedSettingsWarning.style.outline = 'none';
-            advancedSettingsWarning.style.transition = 'all 0.2s ease';
-            advancedSettingsWarning.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
-
-            advancedBox.appendChild(advancedSettingsWarning);
-
             return advancedBox;
     }
-
-    /*
-        @returns Returns the advanced settings element
-    */
-    private createPluginSettings(plugin: Plugin): HTMLElement {
-        const contentColumn = document.createElement('div');
-        contentColumn.style.display = 'flex';
-        contentColumn.style.alignItems = 'center';
-        contentColumn.style.flexDirection = 'column';
-        contentColumn.style.background = 'var(--theme-background-mute)';
-        contentColumn.style.borderRadius = '8px';
-        contentColumn.style.border = '1px solid var(--theme-border)';
-        contentColumn.style.margin = '2px 0';
-        contentColumn.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
-        contentColumn.style.transition = 'all 0.2s ease';
-        contentColumn.style.minHeight = '48px';
-
-        // Add hover effect
-        contentColumn.addEventListener('mouseenter', () => {
-            contentColumn.style.background = 'var(--theme-background-light)';
-            contentColumn.style.border = '1px solid var(--theme-divider)';
-            contentColumn.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)';
-        });
-        contentColumn.addEventListener('mouseleave', () => {
-            contentColumn.style.background = 'var(--theme-background-mute)';
-            contentColumn.style.border = '1px solid var(--theme-border)';
-            contentColumn.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
-        });
-
-
+    private createPluginSettings(plugin: Plugin) {
         const contentRow = document.createElement('div');
         contentRow.id = `highlite-settings-content-row-${plugin.pluginName}`;
         contentRow.style.minHeight = '48px';
         contentRow.style.display = 'flex';
         contentRow.style.alignItems = 'center';
+        contentRow.style.background = 'var(--theme-background-mute)';
+        contentRow.style.borderRadius = '8px';
+        contentRow.style.border = '1px solid var(--theme-border)';
+        contentRow.style.margin = '2px 0';
         contentRow.style.transition = 'all 0.2s ease';
-        contentRow.style.width = '-webkit-fill-available';
+        contentRow.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+
+        // Add hover effect
+        contentRow.addEventListener('mouseenter', () => {
+            contentRow.style.background = 'var(--theme-background-light)';
+            contentRow.style.border = '1px solid var(--theme-divider)';
+            contentRow.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.4)';
+        });
+        contentRow.addEventListener('mouseleave', () => {
+            contentRow.style.background = 'var(--theme-background-mute)';
+            contentRow.style.border = '1px solid var(--theme-border)';
+            contentRow.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+        });
 
         // Create a container for plugin name and author
         const pluginInfoContainer = document.createElement('div');
@@ -582,16 +553,6 @@ export class SettingsManager {
         pluginInfoContainer.style.flex = '1';
         pluginInfoContainer.style.minWidth = '0';
         pluginInfoContainer.style.padding = '12px 16px';
-
-        const pluginInfoRow = document.createElement('div');
-        pluginInfoRow.id = `highlite-settings-info-row-${plugin.pluginName}`;
-        pluginInfoRow.style.minHeight = '36px';
-        pluginInfoRow.style.paddingTop = '8px';
-        pluginInfoRow.style.display = 'flex';
-        pluginInfoRow.style.flexDirection = 'column';
-        pluginInfoRow.style.alignItems = 'center';
-        pluginInfoRow.style.transition = 'all 0.2s ease';
-        pluginInfoRow.style.width = '-webkit-fill-available';
 
         const pluginName = document.createElement('span');
         pluginName.innerText = plugin.pluginName;
@@ -625,10 +586,8 @@ export class SettingsManager {
         pluginAuthor.style.textOverflow = 'ellipsis';
         pluginAuthor.title = `by ${plugin.author}`; // Show full text on hover
 
-        pluginInfoRow.appendChild(pluginName);
-        pluginInfoRow.appendChild(pluginAuthor);
-
-        contentColumn.appendChild(pluginInfoRow);
+        pluginInfoContainer.appendChild(pluginName);
+        pluginInfoContainer.appendChild(pluginAuthor);
 
         /* this is for the enable section */
         const toggleSwitch = document.createElement('input');
@@ -661,7 +620,7 @@ export class SettingsManager {
         cogIcon.style.padding = '8px';
         cogIcon.style.fontFamily =
             'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-        cogIcon.style.textAlign = 'left';
+        cogIcon.style.textAlign = 'right';
         cogIcon.style.cursor = 'pointer';
         cogIcon.style.borderRadius = '4px';
         cogIcon.style.transition = 'all 0.2s ease';
@@ -688,54 +647,11 @@ export class SettingsManager {
             cogIcon.style.display = 'none';
         }
 
-        let advancedSettings = this.getAdvancedSettings(plugin);
-
-        const importExportIcon = document.createElement('span');
-        importExportIcon.innerText = '📁';
-        importExportIcon.style.color = 'var(--theme-text-muted)';
-        importExportIcon.style.fontSize = '18px';
-        importExportIcon.style.marginRight = '8px';
-        importExportIcon.style.padding = '8px';
-        importExportIcon.style.fontFamily =
-            'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-        importExportIcon.style.textAlign = 'left';
-        importExportIcon.style.cursor = 'pointer';
-        importExportIcon.style.borderRadius = '4px';
-        importExportIcon.style.transition = 'all 0.2s ease';
-
-        // Add hover effect for cog icon
-        importExportIcon.addEventListener('mouseenter', () => {
-            importExportIcon.style.color = 'var(--theme-text-primary)';
-            importExportIcon.style.background = 'var(--theme-border-light)';
-            importExportIcon.style.transform = 'scale(1.1)';
-        });
-        importExportIcon.addEventListener('mouseleave', () => {
-            importExportIcon.style.color = 'var(--theme-text-muted)';
-            importExportIcon.style.background = 'transparent';
-            importExportIcon.style.transform = 'scale(1)';
-        });
-
-        importExportIcon.addEventListener('click', () => {
-            if(advancedSettings.style.display === 'none') {
-                advancedSettings.style.display = 'flex'
-                importExportIcon.innerText = '📂'
-            } else {
-                advancedSettings.style.display = 'none'
-                importExportIcon.innerText = '📁'
-            }
-        });
-
         contentRow.appendChild(pluginInfoContainer);
         contentRow.appendChild(cogIcon);
-        contentRow.appendChild(importExportIcon);
         contentRow.appendChild(toggleSwitch);
 
-        contentColumn.appendChild(contentRow);
-        contentColumn.appendChild(advancedSettings);
-
-        this.mainSettingsView!.appendChild(contentColumn);
-
-        return advancedSettings;
+        this.mainSettingsView!.appendChild(contentRow);
     }
 
     private openPluginSettings(plugin: Plugin) {
@@ -800,6 +716,41 @@ export class SettingsManager {
         titleRow.appendChild(title);
         titleRow.appendChild(authorText);
         this.pluginSettingsView.appendChild(titleRow);
+        
+        // Create an import/export row for the settings panel
+        const pluginImportExportPanel = document.createElement('div');
+        pluginImportExportPanel.id = 'highlite-settings-title-row';
+        pluginImportExportPanel.style.minHeight = '60px';
+        pluginImportExportPanel.style.display = 'flex';
+        pluginImportExportPanel.style.alignItems = 'center';
+        pluginImportExportPanel.style.justifyContent = 'center';
+        pluginImportExportPanel.style.flexDirection = 'column';
+        pluginImportExportPanel.style.background = 'var(--theme-background-mute)';
+        pluginImportExportPanel.style.borderRadius = '8px';
+        pluginImportExportPanel.style.border = '1px solid var(--theme-border)';
+        pluginImportExportPanel.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+        pluginImportExportPanel.style.marginBottom = '8px';
+        pluginImportExportPanel.style.padding = '16px';
+        
+        const pluginImportExportTitle = document.createElement('span');
+        pluginImportExportTitle.innerText = "Transfer Settings";
+        pluginImportExportTitle.style.color = 'var(--theme-text-primary)';
+        pluginImportExportTitle.style.fontSize = '16px';
+        pluginImportExportTitle.style.margin = '0px';
+        pluginImportExportTitle.style.padding = '0px';
+        pluginImportExportTitle.style.fontFamily =
+            'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        pluginImportExportTitle.style.fontWeight = '500';
+        pluginImportExportTitle.style.textAlign = 'left';
+        pluginImportExportTitle.style.letterSpacing = '0.025em';
+        pluginImportExportTitle.style.whiteSpace = 'nowrap';
+        pluginImportExportTitle.style.overflow = 'hidden';
+        pluginImportExportTitle.style.textOverflow = 'ellipsis';
+        pluginImportExportPanel.appendChild(pluginImportExportTitle);
+        
+        pluginImportExportPanel.appendChild(this.getAdvancedSettings(plugin));
+        
+        this.pluginSettingsView.appendChild(pluginImportExportPanel);
 
         // Add a back button in the form of a small row
         const backButton = document.createElement('div');
@@ -846,7 +797,7 @@ export class SettingsManager {
         });
 
         this.pluginSettingsView.appendChild(backButton);
-
+        
         // For each plugin setting, create a row with the setting name and appropriate input
         for (const settingKey in plugin.settings) {
             if (settingKey === 'enable') {
