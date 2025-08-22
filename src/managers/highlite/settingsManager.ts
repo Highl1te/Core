@@ -733,19 +733,16 @@ export class SettingsManager {
         pluginImportExportPanel.style.padding = '16px';
         
         const pluginImportExportTitle = document.createElement('span');
-        pluginImportExportTitle.innerText = "Transfer Settings";
+        pluginImportExportTitle.innerText = "Transfer Plugin Data";
         pluginImportExportTitle.style.color = 'var(--theme-text-primary)';
         pluginImportExportTitle.style.fontSize = '16px';
-        pluginImportExportTitle.style.margin = '0px';
-        pluginImportExportTitle.style.padding = '0px';
+        pluginImportExportTitle.style.padding = '8px';
         pluginImportExportTitle.style.fontFamily =
             'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
         pluginImportExportTitle.style.fontWeight = '500';
         pluginImportExportTitle.style.textAlign = 'left';
         pluginImportExportTitle.style.letterSpacing = '0.025em';
         pluginImportExportTitle.style.whiteSpace = 'nowrap';
-        pluginImportExportTitle.style.overflow = 'hidden';
-        pluginImportExportTitle.style.textOverflow = 'ellipsis';
         pluginImportExportPanel.appendChild(pluginImportExportTitle);
         
         pluginImportExportPanel.appendChild(this.getAdvancedSettings(plugin));
