@@ -743,6 +743,7 @@ export class SettingsManager {
         pluginImportExportTitle.style.textAlign = 'left';
         pluginImportExportTitle.style.letterSpacing = '0.025em';
         pluginImportExportTitle.style.whiteSpace = 'nowrap';
+        pluginImportExportTitle.title = `⚠️ Only import data and settings from trusted sources.`;
         pluginImportExportPanel.appendChild(pluginImportExportTitle);
         
         pluginImportExportPanel.appendChild(this.getAdvancedSettings(plugin));
