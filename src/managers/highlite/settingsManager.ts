@@ -736,7 +736,7 @@ export class SettingsManager {
         pluginImportExportTitle.innerText = "Transfer Plugin Data";
         pluginImportExportTitle.style.color = 'var(--theme-text-primary)';
         pluginImportExportTitle.style.fontSize = '16px';
-        pluginImportExportTitle.style.padding = '8px';
+        pluginImportExportTitle.style.paddingBottom = '8px';
         pluginImportExportTitle.style.fontFamily =
             'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
         pluginImportExportTitle.style.fontWeight = '500';
