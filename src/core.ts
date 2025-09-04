@@ -1,8 +1,27 @@
+/*! 
+
+Copyright (C) 2025  HighLite
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+*/
+
 import { ContextMenuManager } from './managers/game/contextMenuManager';
 import { HookManager } from './managers/highlite/hookManager';
 import { NotificationManager } from './managers/highlite/notificationManager';
 import { PanelManager } from './managers/highlite/panelManager';
-import { PluginManager } from './managers/highlite/pluginManger';
+import { PluginManager } from './managers/highlite/pluginManager';
 import { PluginDataManager } from "./managers/highlite/pluginDataManager";
 import { UIManager } from './managers/highlite/uiManager';
 import { SettingsManager } from './managers/highlite/settingsManager';
@@ -28,28 +47,21 @@ export class Highlite {
         document.highlite = {
             managers: {},
             gameHooks: {},
-            gameLookups: {},
-            plugins: [],
+            gameLookups: {}
         };
 
+        this.pluginManager = new PluginManager();
         this.hookManager = new HookManager();
+
         this.contextMenuManager = new ContextMenuManager();
         this.notificationManager = new NotificationManager();
-        this.pluginManager = new PluginManager();
+
         this.uiManager = new UIManager();
         this.panelManager = new PanelManager();
         this.soundManager = new SoundManager();
         this.settingsManager = new SettingsManager();
         this.databaseManager = new DatabaseManager();
         this.pluginDataManager = new PluginDataManager();
-
-        // Bind the classes from the hook manager (registerClass)
-        // Read all the found signature binding 
-        Reflector.bindClassHooks(this.hookManager);
-
-        // Bind the enums to the hook manager (registerEnum)
-        // These are the lookup tables
-        Reflector.bindEnumHooks(this.hookManager);
 
         this.initialize();
     }
@@ -72,11 +84,14 @@ export class Highlite {
         await this.settingsManager.registerPlugins();
         await this.pluginDataManager.initialize();
         for (const plugin of this.pluginManager.plugins) {
-            await this.pluginDataManager.addPlugin(plugin);
+            if (plugin.instance) {
+                await this.pluginDataManager.addPlugin(plugin.instance);
+            }
         }
         this.pluginManager.initAll();
         this.pluginManager.postInitAll();
         this.pluginManager.startAll();
+        this.pluginManager.setLoginState(true);
     }
 
     async stopHook(fnName: string, ...args: any[]) {
@@ -84,10 +99,19 @@ export class Highlite {
         this.panelManager.forceClose();
         this.settingsManager.deinit();
         this.pluginManager.stopAll();
+        this.pluginManager.setLoginState(false);
     }
 
     initialize() {
         console.info("[Highlite] Core Initializing")
+
+        // Bind the classes from the hook manager (registerClass)
+        // Read all the found signature binding 
+        Reflector.bindClassHooks(this.hookManager);
+
+        // Bind the enums to the hook manager (registerEnum)
+        // These are the lookup tables
+        Reflector.bindEnumHooks(this.hookManager);
 
         // Function Hook-ins
         this.hookManager.registerClassOverrideHook('LoginScreen', '_handleRegisterButtonClicked', this.loginHooks);
@@ -108,6 +132,9 @@ export class Highlite {
         this.contextMenuManager.registerContextHook('ContextMenuItemManager','_createGameWorldContextMenuItems', this.contextMenuManager.gameWorldContextHook);
         this.hookManager.registerStaticClassHook('TargetActionManager', 'handleTargetAction');
         this.hookManager.registerStaticClassHook('TargetActionManager','getActionsAndEntitiesAtMousePointer',this.contextMenuManager.ActionSorting);
+
+
+    // Plugin Hub UI will be initialized after DB is ready in start()
     }
 
     async start() {
@@ -120,6 +147,8 @@ export class Highlite {
             console.info('[Highlite] Database initialized!');
         }
         await this.notificationManager.askNotificationPermission();
+    // Initialize Plugin Hub now that DB is ready
+    await this.pluginManager.initialize();
     }
 
     stop() {

@@ -11,10 +11,10 @@
         "outDir": "./dist",
         "rootDir": "./src",
         "declaration": true,
-        "declarationMap": true,
+        "declarationMap": false,
         "emitDeclarationOnly": false,
         "noEmit": false,
-        
+
         // Type Checking
         "strict": true,
         "noImplicitAny": false,

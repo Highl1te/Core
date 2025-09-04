@@ -1,3 +1,22 @@
+/*! 
+
+Copyright (C) 2025  HighLite
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+*/
+
 export class HookManager {
     private static instance: HookManager;
 
@@ -5,6 +24,12 @@ export class HookManager {
         if (HookManager.instance) {
             return HookManager.instance;
         }
+
+        if (document.highlite.managers.HookManager) {
+            HookManager.instance = document.highlite.managers.HookManager;
+            return document.highlite.managers.HookManager;
+        }
+
         HookManager.instance = this;
         document.highlite.managers.HookManager = this;
     }
@@ -156,15 +181,22 @@ export class HookManager {
     }
 
     private hook(fnName: string, ...args: any[]): void {
-        for (const plugin of document.highlite.plugins) {
-            if (typeof plugin[fnName] === 'function') {
+        if (!document.highlite.managers.PluginManager) {
+            console.warn(`[Highlite] Plugin Manager not initialized.`);
+            return;
+        }
+        for (const plugin of document.highlite.managers.PluginManager.plugins) {
+            if (!plugin.instance) {
+                continue;
+            }
+            if (typeof plugin.instance[fnName] === 'function') {
                 try {
-                    if (plugin.settings.enable.value) {
-                        plugin[fnName].apply(plugin, args);
+                    if (plugin.instance.settings.enable.value) {
+                        plugin.instance[fnName].apply(plugin.instance, args);
                     }
                 } catch (error) {
                     console.error(
-                        `[Highlite] Error in plugin ${plugin.pluginName} (${fnName}):`,
+                        `[Highlite] Error in plugin ${plugin.instance?.pluginName} (${fnName}):`,
                         error
                     );
                 }

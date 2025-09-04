@@ -1,19 +1,19 @@
 {
-  "name": "@highlite/plugin-api",
-  "version": "1.1.0",
-  "description": "Plugin API for the High Spell Highlite Client",
+  "name": "@highlite/core",
+  "version": "2.2.1",
+  "description": "HighLite Client Core",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist/**/*.js",
     "dist/**/*.d.ts",
-    "dist/**/*.d.ts.map",
+    "dist/**/*.js",
+    "dist/**/*.js.map",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "npm run build"
+    "build": "node esbuild.mjs && tsc --emitDeclarationOnly",
+    "prepublishOnly": "yarn run build"
   },
   "keywords": [
     "highlite",
@@ -24,10 +24,10 @@
     "framework"
   ],
   "author": "Highl1te",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Highl1te/Core.git"
+    "url": "git+https://github.com/Highl1te/Core.git"
   },
   "bugs": {
     "url": "https://github.com/Highl1te/Core/issues"
@@ -37,14 +37,17 @@
     "acorn": "^8.15.0",
     "acorn-walk": "^8.3.4",
     "idb": "^8.0.3",
-    "on-change": "^5.0.1"
+    "on-change": "^5.0.1",
+    "tsc": "^2.0.4"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "esbuild": "^0.25.8",
+    "typescript": "^5.9.2"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=22.0.0"
   },
+  "packageManager": "yarn@4.9.2",
   "publishConfig": {
     "access": "public"
   }

@@ -1,7 +1,26 @@
+/*! 
+
+Copyright (C) 2025  HighLite
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+*/
+
 import { type IDBPDatabase } from 'idb';
 import type { HighliteSchema } from '../../interfaces/highlite/database/database.schema';
 import { type Plugin } from '../../interfaces/highlite/plugin/plugin.class';
-import { SettingsTypes } from '../../interfaces/highlite/plugin/pluginSettings.interface';
+import { PluginSettings, SettingsTypes } from '../../interfaces/highlite/plugin/pluginSettings.interface';
 import type { PanelManager } from './panelManager';
 
 export class SettingsManager {
@@ -14,6 +33,8 @@ export class SettingsManager {
 
     private pluginSettings!: { [plugin: string]: HTMLElement };
 
+    public isInitialized = false;
+
     panelContainer: HTMLDivElement | null = null;
     currentView: HTMLDivElement | null = null;
     mainSettingsView: HTMLDivElement | null = null;
@@ -23,20 +44,29 @@ export class SettingsManager {
         if (SettingsManager.instance) {
             return SettingsManager.instance;
         }
+
+        if (document.highlite.managers.SettingsManager) {
+            SettingsManager.instance = document.highlite.managers.SettingsManager;
+            return document.highlite.managers.SettingsManager;
+        }
+
         SettingsManager.instance = this;
         document.highlite.managers.SettingsManager = this;
     }
 
     async init() {
         this.database = document.highlite.managers.DatabaseManager.database;
-        this.pluginList = document.highlite.plugins;
+        this.pluginList = document.highlite.managers.PluginManager.plugins;
+        this.pluginList = this.pluginList.map(plugin => plugin.instance).filter((instance): instance is Plugin => instance !== undefined);
+
         this.panelManager = document.highlite.managers.PanelManager;
         this.username = document.highlite.gameHooks.EntityManager.Instance._mainPlayer._nameLowerCase;
         this.createMenu();
+        this.isInitialized = true;
         return Promise.resolve();
     }
 
-    deinit(): void {
+    async deinit(): Promise<void> {
         this.panelManager.removeMenuItem('🛠️');
         if (this.panelContainer) {
             this.panelContainer.remove();
@@ -57,6 +87,18 @@ export class SettingsManager {
             this.pluginSettingsView.remove();
             this.pluginSettingsView = null;
         }
+
+        this.pluginSettings = {};
+
+        this.isInitialized = false;
+    }
+
+    async refresh(): Promise<void> {
+    if (!this.isInitialized) return;
+    await this.deinit();
+    await this.init();
+    // Re-register to rebuild plugin list and UI rows after installs/uninstalls
+    await this.registerPlugins();
     }
 
     /**
@@ -135,7 +177,7 @@ export class SettingsManager {
                 }
             }
         }
-
+        
         // This will either "update" or "create" the settings for each plugin on a user.
         for (let plugin of this.pluginList) {
             await this.storePluginSettings(this.username, plugin);
@@ -184,6 +226,7 @@ export class SettingsManager {
         this.mainSettingsView.style.flexDirection = 'column';
         this.mainSettingsView.style.padding = '8px';
         this.mainSettingsView.style.gap = '2px';
+
 
         // Create search bar container
         const searchContainer = document.createElement('div');
@@ -243,6 +286,241 @@ export class SettingsManager {
         this.panelContainer.appendChild(this.currentView);
     }
 
+    private getAdvancedSettings(plugin: Plugin): HTMLElement {
+            const advancedBox = document.createElement('div');
+            // advancedBox.style.background = 'var(--theme-background-mute)';
+            // advancedBox.style.border = '1px solid var(--theme-border)';
+            // advancedBox.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+            advancedBox.style.minHeight = '24px';
+            advancedBox.style.display = 'flex';
+            advancedBox.style.alignItems = 'left';
+            advancedBox.style.flexDirection = 'row';
+            advancedBox.style.gap = '4px';
+
+            const exportSettings = document.createElement('span');
+            exportSettings.innerText = '📱';
+            exportSettings.title = 'Export Settings To Clipboard';
+            exportSettings.style.color = 'var(--theme-text-muted)';
+            exportSettings.style.fontSize = '16px';
+            exportSettings.style.marginRight = '8px';
+            exportSettings.style.padding = '8px';
+            exportSettings.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            exportSettings.style.textAlign = 'left';
+            exportSettings.style.cursor = 'pointer';
+            exportSettings.style.borderRadius = '4px';
+            exportSettings.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            exportSettings.addEventListener('mouseenter', () => {
+                exportSettings.style.color = 'var(--theme-text-primary)';
+                exportSettings.style.background = 'var(--theme-border-light)';
+                exportSettings.style.transform = 'scale(1.1)';
+            });
+            exportSettings.addEventListener('mouseleave', () => {
+                exportSettings.style.color = 'var(--theme-text-muted)';
+                exportSettings.style.background = 'transparent';
+                exportSettings.style.transform = 'scale(1)';
+            });
+            exportSettings.addEventListener('click', async () => {
+                const type = "text/plain"; // Need to do text plain since application/json is not guaranteed to be supported
+                const clipboardItemData = { 
+                    [type]: JSON.stringify({
+                        pluginName: plugin.pluginName,
+                        pluginSettings: plugin.settings,
+                    }),
+                };
+                const clipboardItem = new ClipboardItem(clipboardItemData);
+                await navigator.clipboard.write([clipboardItem]);
+            });
+            // If plugin only has the enable setting, hide import/export settings
+            if (Object.keys(plugin.settings).length === 1) {
+                exportSettings.style.display = 'none';
+            }
+            advancedBox.appendChild(exportSettings);
+            
+            const importSettings = document.createElement('span');
+            importSettings.innerText = '📲';
+            importSettings.title = 'Import Settings From Clipboard';
+            importSettings.style.color = 'var(--theme-text-muted)';
+            importSettings.style.fontSize = '16px';
+            importSettings.style.marginRight = '8px';
+            importSettings.style.padding = '8px';
+            importSettings.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            importSettings.style.textAlign = 'left';
+            importSettings.style.cursor = 'pointer';
+            importSettings.style.borderRadius = '4px';
+            importSettings.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            importSettings.addEventListener('mouseenter', () => {
+                importSettings.style.color = 'var(--theme-text-primary)';
+                importSettings.style.background = 'var(--theme-border-light)';
+                importSettings.style.transform = 'scale(1.1)';
+            });
+            importSettings.addEventListener('mouseleave', () => {
+                importSettings.style.color = 'var(--theme-text-muted)';
+                importSettings.style.background = 'transparent';
+                importSettings.style.transform = 'scale(1)';
+            });
+            importSettings.addEventListener('click', async () => {
+                await navigator.clipboard
+                    .readText()
+                    .then((clipText) => {
+                        let importDataJson = JSON.parse(clipText);
+                        if(importDataJson.pluginName !== plugin.pluginName) {
+                            throw new Error('Mismatched plugin name')
+                        }
+                        if(!importDataJson.pluginSettings) {
+                            throw new Error('No settings found')
+                        }
+                        
+                        Object.entries(importDataJson.pluginSettings).forEach((entry) => {
+                            let key: string = entry[0];
+                            let value: PluginSettings = entry[1] as PluginSettings;
+                            plugin.settings[key].value = value.value;
+                        });
+                    }).catch((e) => {
+                        console.error("Attempted to import settings with invalid JSON", e);
+                    });
+                await this.storePluginSettings(this.username, plugin);
+
+                // Refresh visibility of all settings in case dependencies changed
+                this.refreshPluginSettingsVisibility(plugin);
+
+                // Refresh disabled state of all settings in case dependencies changed
+                this.refreshPluginSettingsDisabled(plugin);
+            });
+
+            // If plugin only has the enable setting, hide import/export settings
+            if (Object.keys(plugin.settings).length === 1) {
+                importSettings.style.display = 'none';
+            }
+            advancedBox.appendChild(importSettings);
+
+
+            
+            const exportdata = document.createElement('span');
+            exportdata.innerText = '📤';
+            exportdata.title = 'Export Data To Clipboard';
+            exportdata.style.color = 'var(--theme-text-muted)';
+            exportdata.style.fontSize = '16px';
+            exportdata.style.marginRight = '8px';
+            exportdata.style.padding = '8px';
+            exportdata.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            exportdata.style.textAlign = 'left';
+            exportdata.style.cursor = 'pointer';
+            exportdata.style.borderRadius = '4px';
+            exportdata.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            exportdata.addEventListener('mouseenter', () => {
+                exportdata.style.color = 'var(--theme-text-primary)';
+                exportdata.style.background = 'var(--theme-border-light)';
+                exportdata.style.transform = 'scale(1.1)';
+            });
+            exportdata.addEventListener('mouseleave', () => {
+                exportdata.style.color = 'var(--theme-text-muted)';
+                exportdata.style.background = 'transparent';
+                exportdata.style.transform = 'scale(1)';
+            });
+            exportdata.addEventListener('click', async () => {
+                const type = "text/plain"; // Need to do 'text/plain' since application/json is not guaranteed to be supported
+                const clipboardItemData = {
+                    [type]: JSON.stringify({
+                        pluginName: plugin.pluginName,
+                        pluginData: plugin.data
+                    })
+                };
+                const clipboardItem = new ClipboardItem(clipboardItemData);
+                await navigator.clipboard.write([clipboardItem]);
+            });
+            // If plugin lacks data, hide export data
+            if (Object.keys(plugin.data).length === 1) {
+                exportdata.style.display = 'none';
+            }
+            advancedBox.appendChild(exportdata);
+
+
+            const importdata = document.createElement('span');
+            importdata.innerText = '📥';
+            importdata.title = 'Import Data From Clipboard'
+            importdata.style.color = 'var(--theme-text-muted)';
+            importdata.style.fontSize = '16px';
+            importdata.style.marginRight = '8px';
+            importdata.style.padding = '8px';
+            importdata.style.fontFamily =
+                'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            importdata.style.textAlign = 'left';
+            importdata.style.cursor = 'pointer';
+            importdata.style.borderRadius = '4px';
+            importdata.style.transition = 'all 0.2s ease';
+            // Add hover effect for cog icon
+            importdata.addEventListener('mouseenter', () => {
+                importdata.style.color = 'var(--theme-text-primary)';
+                importdata.style.background = 'var(--theme-border-light)';
+                importdata.style.transform = 'scale(1.1)';
+            });
+            importdata.addEventListener('mouseleave', () => {
+                importdata.style.color = 'var(--theme-text-muted)';
+                importdata.style.background = 'transparent';
+                importdata.style.transform = 'scale(1)';
+            });
+            importdata.addEventListener('click', async () => {
+                await navigator.clipboard
+                    .readText()
+                    .then(async (clipText) => {
+                        let importDataJson = JSON.parse(clipText);
+
+                        if(importDataJson.pluginName !== plugin.pluginName) {
+                            throw new Error('Mismatched plugin name')
+                        }
+                        if(!importDataJson.pluginData) {
+                            throw new Error('No data found')
+                        }
+
+                        var originallyEnabled = plugin.settings.enable.value;
+
+                        if(originallyEnabled) {
+                            // Turn off plugin before modifying
+                            plugin.settings.enable.value = false;
+                            try {
+                                plugin.settings.enable.callback.call(plugin);
+                            } catch (error) {
+                                console.error(`Error calling enable callback for plugin ${plugin.pluginName}:`, error);
+                                console.error(`Continuing without calling the callback.`);
+                            }
+                            await this.storePluginSettings(this.username, plugin);
+                        }
+
+                        // Clear extra data first
+                        Object.entries(plugin.data).forEach(([key, value]) => {
+                            delete plugin.data[key];
+                        })
+
+                        Object.entries(importDataJson.pluginData).forEach(([key, value]) => {
+                            plugin.data[key] = value;
+                        })
+
+                        if(originallyEnabled) {
+                            // Reenable plugin
+                            plugin.settings.enable.value = true;
+                            try {
+                                plugin.settings.enable.callback.call(plugin);
+                            } catch (error) {
+                                console.error(`Error calling enable callback for plugin ${plugin.pluginName}:`, error);
+                                console.error(`Continuing without calling the callback.`);
+                            }
+                            await this.storePluginSettings(this.username, plugin);
+                        }
+
+                    }).catch((e) => {
+                        console.error("Attempted to import data with invalid JSON", e);
+                    });
+            });
+            advancedBox.appendChild(importdata);
+
+            return advancedBox;
+    }
     private createPluginSettings(plugin: Plugin) {
         const contentRow = document.createElement('div');
         contentRow.id = `highlite-settings-content-row-${plugin.pluginName}`;
@@ -322,7 +600,14 @@ export class SettingsManager {
         toggleSwitch.style.accentColor = 'var(--theme-accent)';
         toggleSwitch.addEventListener('change', async () => {
             plugin.settings.enable.value = toggleSwitch.checked;
-            plugin.settings.enable.callback.call(plugin);
+            
+            try {
+                plugin.settings.enable.callback.call(plugin);
+            } catch (error) {
+                console.error(`Error calling enable callback for plugin ${plugin.pluginName}:`, error);
+                console.error(`Continuing without calling the callback.`);
+            }
+            
             await this.storePluginSettings(this.username, plugin);
         });
 
@@ -431,6 +716,39 @@ export class SettingsManager {
         titleRow.appendChild(title);
         titleRow.appendChild(authorText);
         this.pluginSettingsView.appendChild(titleRow);
+        
+        // Create an import/export row for the settings panel
+        const pluginImportExportPanel = document.createElement('div');
+        pluginImportExportPanel.id = 'highlite-settings-title-row';
+        pluginImportExportPanel.style.minHeight = '60px';
+        pluginImportExportPanel.style.display = 'flex';
+        pluginImportExportPanel.style.alignItems = 'center';
+        pluginImportExportPanel.style.justifyContent = 'center';
+        pluginImportExportPanel.style.flexDirection = 'column';
+        pluginImportExportPanel.style.background = 'var(--theme-background-mute)';
+        pluginImportExportPanel.style.borderRadius = '8px';
+        pluginImportExportPanel.style.border = '1px solid var(--theme-border)';
+        pluginImportExportPanel.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+        pluginImportExportPanel.style.marginBottom = '8px';
+        pluginImportExportPanel.style.padding = '16px';
+        
+        const pluginImportExportTitle = document.createElement('span');
+        pluginImportExportTitle.innerText = "Transfer Plugin Data";
+        pluginImportExportTitle.style.color = 'var(--theme-text-primary)';
+        pluginImportExportTitle.style.fontSize = '16px';
+        pluginImportExportTitle.style.paddingBottom = '8px';
+        pluginImportExportTitle.style.fontFamily =
+            'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+        pluginImportExportTitle.style.fontWeight = '500';
+        pluginImportExportTitle.style.textAlign = 'left';
+        pluginImportExportTitle.style.letterSpacing = '0.025em';
+        pluginImportExportTitle.style.whiteSpace = 'nowrap';
+        pluginImportExportTitle.title = `⚠️ Only import data and settings from trusted sources.`;
+        pluginImportExportPanel.appendChild(pluginImportExportTitle);
+        
+        pluginImportExportPanel.appendChild(this.getAdvancedSettings(plugin));
+        
+        this.pluginSettingsView.appendChild(pluginImportExportPanel);
 
         // Add a back button in the form of a small row
         const backButton = document.createElement('div');
@@ -477,7 +795,7 @@ export class SettingsManager {
         });
 
         this.pluginSettingsView.appendChild(backButton);
-
+        
         // For each plugin setting, create a row with the setting name and appropriate input
         for (const settingKey in plugin.settings) {
             if (settingKey === 'enable') {
@@ -559,7 +877,14 @@ export class SettingsManager {
 
                         // Valid value - apply and save
                         setting.value = newValue;
-                        setting.callback.call(plugin);
+
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
+                        
                         await this.storePluginSettings(this.username, plugin);
 
                         // Refresh visibility of all settings in case dependencies changed
@@ -669,7 +994,12 @@ export class SettingsManager {
 
                         // Valid value - apply and save
                         setting.value = newValue;
-                        setting.callback.call(plugin);
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
                         await this.storePluginSettings(this.username, plugin);
 
                         // Refresh visibility of all settings in case dependencies changed
@@ -757,7 +1087,12 @@ export class SettingsManager {
 
                         // Valid value - apply and save
                         setting.value = newValue;
-                        setting.callback.call(plugin);
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
                         await this.storePluginSettings(this.username, plugin);
 
                         // Refresh visibility of all settings in case dependencies changed
@@ -842,7 +1177,12 @@ export class SettingsManager {
 
                         // Valid value - apply and save
                         setting.value = newValue;
-                        setting.callback.call(plugin);
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
                         await this.storePluginSettings(this.username, plugin);
 
                         // Refresh visibility of all settings in case dependencies changed
@@ -904,7 +1244,12 @@ export class SettingsManager {
                     buttonInput.innerText = finalizedSettingName;
 
                     buttonInput.addEventListener('click', async () => {
-                        setting.callback.call(plugin);
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
 
                         // Refresh visibility of all settings in case dependencies changed
                         this.refreshPluginSettingsVisibility(plugin);
@@ -965,7 +1310,12 @@ export class SettingsManager {
                     comboSelect.addEventListener('change', async () => {
                         const newValue = comboSelect.value;
                         setting.value = newValue;
-                        setting.callback.call(plugin);
+                        try {
+                            setting.callback.call(plugin);
+                        } catch (error) {
+                            console.error(`Error calling callback for setting ${settingKey} in plugin ${plugin.pluginName}:`, error);
+                            console.error(`Continuing without calling the callback.`);
+                        }
                         await this.storePluginSettings(this.username, plugin);
                         this.refreshPluginSettingsVisibility(plugin);
                     });
@@ -1025,9 +1375,207 @@ export class SettingsManager {
 
                     break;
 
+                case SettingsTypes.textarea:
+                    const textareaContainer = document.createElement('div');
+                    textareaContainer.style.display = 'flex';
+                    textareaContainer.style.flexDirection = 'column';
+                    textareaContainer.style.gap = '8px';
+
+                    const textareaInput = document.createElement('textarea');
+                    textareaInput.value = (setting.value as string) || '';
+                    textareaInput.style.padding = '8px 12px';
+                    textareaInput.style.borderRadius = '6px';
+                    textareaInput.style.border = '1px solid var(--theme-border)';
+                    textareaInput.style.background = 'var(--theme-background)';
+                    textareaInput.style.color = 'var(--theme-text-primary)';
+                    textareaInput.style.fontSize = '14px';
+                    textareaInput.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    textareaInput.style.outline = 'none';
+                    textareaInput.style.transition = 'all 0.2s ease';
+                    textareaInput.style.resize = 'vertical';
+                    textareaInput.style.minHeight = '80px';
+                    textareaInput.style.maxHeight = '200px';
+
+                    // Add focus styling
+                    textareaInput.addEventListener('focus', e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        textareaInput.style.border =
+                            '1px solid var(--theme-accent)';
+                        textareaInput.style.boxShadow =
+                            '0 0 0 2px var(--theme-accent-transparent-20)';
+                    });
+                    textareaInput.addEventListener('blur', () => {
+                        textareaInput.style.border =
+                            '1px solid var(--theme-border)';
+                        textareaInput.style.boxShadow = 'none';
+                    });
+
+                    textareaInput.addEventListener('change', async () => {
+                        const newValue = textareaInput.value;
+
+                        // Check validation if it exists
+                        if (
+                            setting.validation &&
+                            !setting.validation(newValue)
+                        ) {
+                            // Invalid value - revert to previous value and show error styling
+                            textareaInput.value = setting.value as string;
+                            textareaInput.style.border = '1px solid #ff4444';
+                            textareaInput.style.boxShadow =
+                                '0 0 0 2px rgba(255, 68, 68, 0.2)';
+                            return;
+                        }
+
+                        // Valid value - apply and save
+                        setting.value = newValue;
+                        setting.callback.call(plugin);
+                        await this.storePluginSettings(this.username, plugin);
+
+                        // Refresh visibility of all settings in case dependencies changed
+                        this.refreshPluginSettingsVisibility(plugin);
+
+                        // Reset styling to normal
+                        textareaInput.style.border =
+                            '1px solid var(--theme-border)';
+                        textareaInput.style.boxShadow = 'none';
+                    });
+
+                    // Add a label for the textarea input
+                    const textareaLabel = document.createElement('label');
+                    textareaLabel.innerText = finalizedSettingName;
+                    textareaLabel.style.color = 'var(--theme-text-primary)';
+                    textareaLabel.style.fontSize = '16px';
+                    textareaLabel.style.margin = '0px';
+                    textareaLabel.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    textareaLabel.style.fontWeight = '500';
+                    textareaLabel.style.letterSpacing = '0.025em';
+                    textareaLabel.style.whiteSpace = 'nowrap';
+                    textareaLabel.style.overflow = 'hidden';
+                    textareaLabel.style.textOverflow = 'ellipsis';
+
+                    textareaContainer.appendChild(textareaLabel);
+                    textareaContainer.appendChild(textareaInput);
+                    contentRow.appendChild(textareaContainer);
+
+                    break;
+
+                case SettingsTypes.alert:
+                    const alertBox = document.createElement('div');
+                    alertBox.style.padding = '16px';
+                    alertBox.style.borderRadius = '6px';
+                    alertBox.style.border = '1px solid #dc3545';
+                    alertBox.style.background = '#f8d7da';
+                    alertBox.style.color = '#721c24';
+                    alertBox.style.fontSize = '14px';
+                    alertBox.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    alertBox.style.fontWeight = '400';
+                    alertBox.style.lineHeight = '1.5';
+                    alertBox.style.textAlign = 'center';
+                    alertBox.style.display = 'flex';
+                    alertBox.style.flexDirection = 'column';
+                    alertBox.style.gap = '8px';
+
+                    // Add the title inside the alert box
+                    const alertTitle = document.createElement('div');
+                    alertTitle.innerText = finalizedSettingName;
+                    alertTitle.style.fontWeight = 'bold';
+                    alertTitle.style.fontSize = '16px';
+                    alertTitle.style.color = '#721c24';
+                    alertTitle.style.marginBottom = '4px';
+
+                    // Add the content
+                    const alertContent = document.createElement('div');
+                    alertContent.style.whiteSpace = 'pre-wrap';
+                    alertContent.textContent = (setting.value as string) || '';
+
+                    alertBox.appendChild(alertTitle);
+                    alertBox.appendChild(alertContent);
+                    contentRow.appendChild(alertBox);
+
+                    break;
+
+                case SettingsTypes.warning:
+                    const warningBox = document.createElement('div');
+                    warningBox.style.padding = '16px';
+                    warningBox.style.borderRadius = '6px';
+                    warningBox.style.border = '1px solid #ffc107';
+                    warningBox.style.background = '#fff3cd';
+                    warningBox.style.color = '#856404';
+                    warningBox.style.fontSize = '14px';
+                    warningBox.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    warningBox.style.fontWeight = '400';
+                    warningBox.style.lineHeight = '1.5';
+                    warningBox.style.textAlign = 'center';
+                    warningBox.style.display = 'flex';
+                    warningBox.style.flexDirection = 'column';
+                    warningBox.style.gap = '8px';
+
+                    // Add the title inside the warning box
+                    const warningTitle = document.createElement('div');
+                    warningTitle.innerText = finalizedSettingName;
+                    warningTitle.style.fontWeight = 'bold';
+                    warningTitle.style.fontSize = '16px';
+                    warningTitle.style.color = '#856404';
+                    warningTitle.style.marginBottom = '4px';
+
+                    // Add the content
+                    const warningContent = document.createElement('div');
+                    warningContent.style.whiteSpace = 'pre-wrap';
+                    warningContent.textContent = (setting.value as string) || '';
+
+                    warningBox.appendChild(warningTitle);
+                    warningBox.appendChild(warningContent);
+                    contentRow.appendChild(warningBox);
+
+                    break;
+
+                case SettingsTypes.info:
+                    const infoBox = document.createElement('div');
+                    infoBox.style.padding = '16px';
+                    infoBox.style.borderRadius = '6px';
+                    infoBox.style.border = '1px solid #0dcaf0';
+                    infoBox.style.background = '#d1ecf1';
+                    infoBox.style.color = '#055160';
+                    infoBox.style.fontSize = '14px';
+                    infoBox.style.fontFamily =
+                        'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+                    infoBox.style.fontWeight = '400';
+                    infoBox.style.lineHeight = '1.5';
+                    infoBox.style.textAlign = 'center';
+                    infoBox.style.display = 'flex';
+                    infoBox.style.flexDirection = 'column';
+                    infoBox.style.gap = '8px';
+
+                    // Add the title inside the info box
+                    const infoTitle = document.createElement('div');
+                    infoTitle.innerText = finalizedSettingName;
+                    infoTitle.style.fontWeight = 'bold';
+                    infoTitle.style.fontSize = '16px';
+                    infoTitle.style.color = '#055160';
+                    infoTitle.style.marginBottom = '4px';
+
+                    // Add the content
+                    const infoContent = document.createElement('div');
+                    infoContent.style.whiteSpace = 'pre-wrap';
+                    infoContent.textContent = (setting.value as string) || '';
+
+                    infoBox.appendChild(infoTitle);
+                    infoBox.appendChild(infoContent);
+                    contentRow.appendChild(infoBox);
+
+                    break;
+
                 default:
-                    // I don't think it should ever reach the default case
-                    throw new Error(`[Highlite] Unsupported setting type for ${settingKey}`);
+                    // Debugging for error handling
+                    const settingType = (setting as any)?.type;
+                    const errorMessage = `[Highlite] Unsupported setting type for ${settingKey}. `;
+                    const fullErrorMessage = errorMessage.concat(settingType ? `Could not read type '${settingType}'` : `Setting type does not exist.`);
+                    throw new Error(fullErrorMessage);
             }
     
             contentRow.title = setting.description
@@ -1163,6 +1711,38 @@ export class SettingsManager {
                     ) as HTMLInputElement;
                     if (textInput) {
                         textInput.value = setting.value as string;
+                    }
+                    break;
+                case SettingsTypes.textarea:
+                    const textareaInput = contentRow.querySelector(
+                        'textarea'
+                    ) as HTMLTextAreaElement;
+                    if (textareaInput) {
+                        textareaInput.value = setting.value as string;
+                    }
+                    break;
+                case SettingsTypes.alert:
+                    const alertContent = contentRow.querySelector(
+                        'div > div:last-child'
+                    ) as HTMLDivElement;
+                    if (alertContent && contentRow.querySelector('div[style*="background: #f8d7da"]')) {
+                        alertContent.textContent = setting.value as string;
+                    }
+                    break;
+                case SettingsTypes.warning:
+                    const warningContent = contentRow.querySelector(
+                        'div > div:last-child'
+                    ) as HTMLDivElement;
+                    if (warningContent && contentRow.querySelector('div[style*="background: #fff3cd"]')) {
+                        warningContent.textContent = setting.value as string;
+                    }
+                    break;
+                case SettingsTypes.info:
+                    const infoContent = contentRow.querySelector(
+                        'div > div:last-child'
+                    ) as HTMLDivElement;
+                    if (infoContent && contentRow.querySelector('div[style*="background: #d1ecf1"]')) {
+                        infoContent.textContent = setting.value as string;
                     }
                     break;
                 case SettingsTypes.combobox:
